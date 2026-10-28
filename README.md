@@ -121,3 +121,4 @@ Chữ, thanh trạm và hiệu ứng dừng ở mỗi trạm giữ nguyên.
 - Gắn ảnh sản phẩm thật lên poster và thẻ sản phẩm.
 - Thêm chỗ trưng bày cho kệ hoodie (`zone: 'hoodie'`) và đảo hàng mới (`zone: 'island'`).
 - Tối ưu cho điện thoại: gộp vật thể tĩnh, giảm đèn, tự hạ chất lượng khi máy yếu.
+# xom-le-15
