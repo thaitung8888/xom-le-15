@@ -1,0 +1,24 @@
+/* Đường cuộn: mỗi trạm là một khoảng cuộn; chữ của trạm hiện ở chú thích cố định (caption.css) */
+main { position: relative; z-index: 2; }
+.stop { min-height: 170vh; }
+.stop.hero {
+  min-height: 100vh; min-height: 100svh;
+  display: flex; align-items: flex-end; padding-block: 0 13vh;
+}
+.stop.outro { min-height: 100vh; min-height: 100svh; }
+
+/* Màn mở đầu */
+.hero-copy { display: flex; flex-direction: column; gap: 14px; max-width: 40rem; min-width: 0; }
+.hero h1 { font-size: clamp(2.3rem, 6.2vw, 4.6rem); max-width: 12ch; }
+.hero h1 em { font-style: normal; color: var(--yellow); }
+.hero .lede { margin: 0; color: var(--ivory); opacity: .84; max-width: 40ch; font-size: 1.05rem; }
+.hint {
+  margin: 6px 0 0; display: flex; align-items: center; gap: 10px;
+  font: 500 12px/1 var(--f-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--yellow);
+}
+.hint i { display: inline-block; width: 1px; height: 26px; background: var(--yellow); animation: drip 1.8s ease-in-out infinite; transform-origin: top; }
+@keyframes drip { 0% { transform: scaleY(0); } 50% { transform: scaleY(1); } 100% { transform: scaleY(1); opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .hint i { animation: none; }
+}

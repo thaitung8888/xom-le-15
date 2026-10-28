@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>15 Xóm Lẻ</title>
+  <meta name="claude:viewport-fit-sides" content="cover">
+  <meta name="description" content="Cuộn để đi vào 15 Xóm Lẻ, tiệm streetwear cuối một con ngõ Hà Nội, dựng 3D bằng Three.js.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&family=Montserrat:ital,wght@0,600;0,700;0,800;0,900;1,800;1,900&display=swap">
+</head>
+<body>
+  <!-- Cảnh 3D (hoặc chuỗi ảnh render) vẽ vào canvas này -->
+  <canvas id="scene" aria-hidden="true"></canvas>
+  <div class="shade"></div>
+
+  <!-- Màn hình tải -->
+  <div class="loader" id="loader" role="status" aria-live="polite">
+    <canvas id="loaderBadge" width="240" height="312" aria-label="Logo 15 Xóm Lẻ"></canvas>
+    <div class="bar"><i id="loadbar"></i></div>
+    <span id="loadpct">0%</span>
+  </div>
+
+  <!-- Thành phần cố định trên màn hình -->
+  <a class="brand" href="#dau-ngo"><span class="n">15</span>XÓM LẺ</a>
+  <div class="meter" id="meter" aria-hidden="true">00%</div>
+  <div class="caption" id="caption" aria-live="polite"></div>
+  <ul class="rail" id="rail" aria-label="Các góc trong tiệm"></ul>
+
+  <!-- Đường cuộn: các <section> được tạo từ src/config/stations.js -->
+  <main id="track"></main>
+
+  <!-- Thẻ thông tin sản phẩm khi bấm chấm giá -->
+  <div class="card" id="card" hidden role="dialog" aria-label="Thông tin sản phẩm">
+    <button class="x" id="cardx" type="button" aria-label="Đóng">×</button>
+    <span class="k" id="cardk"></span>
+    <span class="n" id="cardn"></span>
+    <span class="p" id="cardp"></span>
+    <span class="m" id="cardm"></span>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+/* Chú thích cố định ở góc dưới: không nền, chữ nhỏ, đổi nội dung khi sang trạm mới */
+.caption {
+  position: fixed; z-index: 3;
+  bottom: calc(26px + env(safe-area-inset-bottom, 0px)); left: max(20px, env(safe-area-inset-left, 0px));
+  width: min(21rem, calc(100vw - 72px));
+  display: flex; flex-direction: column; gap: 6px; color: var(--ivory);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .55), 0 2px 16px rgba(0, 0, 0, .55);
+  opacity: 0; transform: translateY(8px); transition: opacity .35s ease, transform .35s ease; pointer-events: none;
+}
+.caption.right { left: auto; right: max(20px, env(safe-area-inset-right, 0px)); text-align: right; align-items: flex-end; }
+.caption.show { opacity: 1; transform: none; }
+.caption.show .btn { pointer-events: auto; }
+.caption .eyebrow { font-size: 11px; }
+.caption.right .eyebrow { justify-content: flex-end; }
+.caption .eyebrow .num { text-shadow: none; }
+.caption h2 { font-size: clamp(1.05rem, 1.6vw, 1.3rem); font-weight: 800; line-height: 1.15; }
+.caption p:not(.eyebrow) { margin: 0; font-size: .86rem; line-height: 1.5; opacity: .82; max-width: 36ch; }
+.caption .hours {
+  display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; margin: 2px 0;
+  font: 500 12px/1.5 var(--f-mono); font-variant-numeric: tabular-nums;
+}
+.caption .hours dt { color: var(--muted); }
+.caption .hours dd { margin: 0; }
+.caption .fine { font: 400 11px/1.5 var(--f-mono); color: var(--muted); letter-spacing: .04em; margin: 2px 0 0; }
+.caption .btn { margin-top: 4px; text-shadow: none; }
+.caption.right .btn { align-self: flex-end; }
+
+@media (max-width: 720px) {
+  .caption, .caption.right {
+    left: max(16px, env(safe-area-inset-left, 0px)); right: auto; width: calc(100vw - 64px);
+    text-align: left; align-items: flex-start;
+  }
+  .caption.right .eyebrow { justify-content: flex-start; }
+  .caption.right .btn { align-self: flex-start; }
+}
