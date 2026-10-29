@@ -7,12 +7,17 @@ export const sb = createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSess
 const isUrl = s => /^(https?:|data:|blob:)/.test(s || '');
 export const fileUrl = path => (!path ? '' : isUrl(path) ? path : publicUrl(path));
 
-// Lỗi từ Supabase → câu tiếng Việt dễ hiểu
+// Lỗi từ Supabase → câu tiếng Việt dễ hiểu, kèm lỗi gốc để dễ tìm nguyên nhân
 export function explain(err) {
-  const m = (err && (err.message || err.error_description || String(err))) || 'Lỗi không rõ';
+  const m = (err && (err.message || err.error_description || err.error || String(err))) || 'Lỗi không rõ';
+  const raw = ` (lỗi gốc: ${m})`;
   if (/Invalid login credentials/i.test(m)) return 'Sai email hoặc mật khẩu.';
   if (/Email not confirmed/i.test(m)) return 'Email chưa được xác nhận. Vào Supabase → Authentication → Users để xác nhận tài khoản.';
-  if (/row-level security|permission denied|Unauthorized|403/i.test(m)) return 'Tài khoản này chưa có quyền quản trị (chưa có tên trong bảng admins).';
+  if (/permission denied for function/i.test(m)) return 'Hàm is_admin chưa được cấp quyền chạy: chạy file supabase/fix-01-quyen.sql trong SQL Editor.' + raw;
+  if (/row-level security|row level security|permission denied|Unauthorized|\b403\b/i.test(m))
+    return 'Supabase chặn thao tác này vì thiếu quyền. Chạy file supabase/fix-01-quyen.sql trong SQL Editor; nếu vẫn lỗi, kiểm tra email đã có trong bảng admins.' + raw;
+  if (/Bucket not found/i.test(m)) return 'Chưa có kho ảnh "products": chạy lại supabase/schema.sql.' + raw;
+  if (/mime type|invalid_mime/i.test(m)) return 'Kho ảnh không nhận loại file này (chỉ WebP / PNG / JPEG).' + raw;
   if (/duplicate key/i.test(m)) return 'Mã sản phẩm bị trùng, hãy đổi tên một chút.';
   if (/Failed to fetch|NetworkError|Load failed/i.test(m)) return 'Không kết nối được Supabase. Kiểm tra mạng rồi thử lại.';
   if (/exceeded the maximum allowed size|Payload too large/i.test(m)) return 'Ảnh quá lớn (tối đa 5 MB).';

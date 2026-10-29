@@ -6,8 +6,8 @@
 // Sản phẩm có trong danh sách này sẽ tự có chấm giá bấm được.
 //
 //   zone : 'skate' (8 mặt ván trên tường phải, slot 0–7)
-//          'shoes' (giá đỡ trên tường giày, đánh số từ 0: hàng dưới lên trên, mỗi hàng trái sang phải)
-//          'hoodie' (thanh treo tường trái, tối đa 15 món, tự xếp đè lên nhau và căn giữa)
+//          'shoes' (giá đỡ trên tường giày, đánh số từ 0: hàng dưới lên trên, mỗi hàng trái sang phải; hiện đang để trống)
+//          'hoodie' (thanh treo tường trái, tối đa 25 món, tự xếp đè lên nhau và căn giữa)
 //   type : (khu hoodie) 'tee' áo thun/polo/áo đấu · 'hoodie' · 'dress' váy — quyết định chiều dài
 //          (xem garmentLengths trong settings.js) và độ phồng
 //   slot : (khu hoodie) thứ tự trên thanh, số nhỏ ở phía cửa. Bỏ trống thì tự xếp: thun → hoodie → váy
@@ -183,33 +183,6 @@ export const PRODUCTS = [
     name: 'Ván "Chữ XÓM"',
     price: 1250000,
     meta: 'Rộng 8.25 inch · in lụa thủ công'
-  },
-  {
-    id: 'giay-vai-nga',
-    zone: 'shoes', slot: 9,
-    kind: 'Giày',
-    name: 'Giày Vải Ngà Viền Tím',
-    price: 890000,
-    meta: 'Size 39 đến 44 · thử tại chỗ',
-    look: { upper: '#f2efe6', sole: '#f2efe6', accent: BR.purple }
-  },
-  {
-    id: 'giay-den-gum',
-    zone: 'shoes', slot: 22,
-    kind: 'Giày',
-    name: 'Giày Đen Đế Gum',
-    price: 990000,
-    meta: 'Size 39 đến 44 · thử tại chỗ',
-    look: { upper: '#1d1e22', sole: '#b77b40', accent: BR.yellow }
-  },
-  {
-    id: 'giay-chay-xam',
-    zone: 'shoes', slot: 33,
-    kind: 'Giày',
-    name: 'Giày Chạy Xám Cam',
-    price: 1290000,
-    meta: 'Size 39 đến 44 · thử tại chỗ',
-    look: { upper: '#9a9da3', sole: '#f2efe6', accent: '#ff6b4a' }
   }
 ];
 

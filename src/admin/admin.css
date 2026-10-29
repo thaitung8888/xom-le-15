@@ -90,11 +90,20 @@ textarea { resize: vertical; }
 .banner span { display: block; color: var(--soft); font-size: .9rem; }
 .list { list-style: none; margin: 0 0 14px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .item {
-  display: grid; grid-template-columns: 28px 64px minmax(0, 1fr) auto auto auto; align-items: center; gap: 14px;
+  display: grid; grid-template-columns: 34px 64px minmax(0, 1fr) auto auto auto; align-items: center; gap: 14px;
   background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px;
 }
 .item.off { opacity: .62; }
-.num { font: 500 12px/1 var(--f-mono); color: var(--soft); }
+.grip {
+  display: flex; flex-direction: column; align-items: center; gap: 4px; width: 34px; padding: 8px 0; margin: -4px 0;
+  border: 0; border-radius: 8px; background: none; color: var(--soft); cursor: grab; touch-action: none; user-select: none;
+}
+.grip:hover { background: rgba(28, 22, 64, .06); color: var(--ink); }
+.grip .dots { font-size: 15px; line-height: 1; letter-spacing: -2px; }
+.num { font: 500 12px/1 var(--f-mono); }
+.list.sorting .item:not(.dragging) { transition: transform .18s ease; }
+.item.dragging { position: relative; z-index: 3; box-shadow: 0 16px 36px rgba(28, 22, 64, .2); border-color: rgba(59, 44, 166, .4); }
+body.dragging-now, body.dragging-now * { cursor: grabbing !important; user-select: none; }
 .thumb {
   width: 64px; height: 72px; border-radius: 8px; display: grid; place-items: center; overflow: hidden;
   background: repeating-conic-gradient(#ece5d7 0 25%, #f7f2e8 0 50%) 0 0 / 14px 14px;
@@ -149,8 +158,8 @@ textarea { resize: vertical; }
 .toast.err { background: var(--danger); color: #fff; }
 
 @media (max-width: 760px) {
-  .item { grid-template-columns: 52px minmax(0, 1fr) auto; grid-template-areas: "thumb info price" "thumb pill act"; row-gap: 8px; }
-  .item .num { display: none; }
+  .item { grid-template-columns: 30px 52px minmax(0, 1fr) auto; grid-template-areas: "grip thumb info price" "grip thumb pill act"; row-gap: 8px; column-gap: 10px; padding: 10px; }
+  .item .grip { grid-area: grip; width: 30px; height: 100%; justify-content: center; }
   .item .thumb { grid-area: thumb; width: 52px; height: 60px; }
   .item .info { grid-area: info; } .item .price { grid-area: price; justify-self: end; }
   .item .pill { grid-area: pill; justify-self: start; } .item .act { grid-area: act; justify-self: end; }

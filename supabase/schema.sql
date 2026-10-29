@@ -13,6 +13,7 @@ create or replace function public.is_admin()
 returns boolean
 language sql stable security definer set search_path = public
 as $$ select exists (select 1 from public.admins where user_id = auth.uid()) $$;
+grant execute on function public.is_admin() to anon, authenticated;
 
 -- quản trị viên được xem danh sách quản trị (để trang admin biết mình có quyền)
 drop policy if exists "admins: tự xem" on public.admins;
@@ -76,6 +77,11 @@ insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_typ
 values ('products', 'products', true, 5242880, array['image/webp', 'image/png', 'image/jpeg'])
 on conflict (id) do update set public = true,
   file_size_limit = excluded.file_size_limit, allowed_mime_types = excluded.allowed_mime_types;
+
+-- tải ảnh có ghi đè (upsert) cần cả quyền xem, thêm và thay
+drop policy if exists "ảnh: admin xem" on storage.objects;
+create policy "ảnh: admin xem" on storage.objects for select to authenticated
+  using (bucket_id = 'products' and public.is_admin());
 
 drop policy if exists "ảnh: admin tải lên" on storage.objects;
 create policy "ảnh: admin tải lên" on storage.objects for insert to authenticated

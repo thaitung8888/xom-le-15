@@ -66,8 +66,8 @@ export const STATIONS = [
     label: 'Tường giày',
     side: 'right',
     camera: { pos: [0, 1.6, -39.2], look: [0, 1.75, -44] },
-    title: 'Giày trưng thẳng lên tường',
-    body: 'Mỗi đôi một giá đỡ, xen giữa poster chạy đêm, bóng rổ, đá cầu. Size 39 đến 44, bấm chấm sáng để xem giá.'
+    title: 'Tường giày, đang chờ hàng',
+    body: 'Hàng giá đỡ đã lắp sẵn, xen giữa poster chạy đêm, bóng rổ, đá cầu. Giày về là lên đây.'
   },
   {
     id: 'phong-thu',

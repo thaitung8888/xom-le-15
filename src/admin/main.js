@@ -10,7 +10,7 @@ import {
 import { prepareGarmentImage } from './image.js';
 
 const ZONE = 'hoodie';
-const RACK_MAX = 15;
+const RACK_MAX = 25;
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL'];
 const TYPE_LABEL = { tee: 'Áo thun', hoodie: 'Hoodie', dress: 'Váy' };
 
@@ -72,7 +72,19 @@ function renderList() {
 
 function rowEl(r, i) {
   const li = el('li', 'item' + (r.published ? '' : ' off'));
-  const num = el('span', 'num', String(i + 1).padStart(2, '0'));
+  // tay nắm: kéo để đổi chỗ (chuột hoặc ngón tay), hoặc bấm vào rồi dùng phím ↑ ↓
+  const num = el('button', 'grip');
+  num.type = 'button'; num.title = 'Kéo để đổi chỗ'; num.setAttribute('aria-label', `Vị trí ${i + 1}: ${r.name}. Kéo hoặc dùng phím mũi tên lên xuống để đổi chỗ`);
+  num.append(el('span', 'dots', '⋮⋮'), el('span', 'num', String(i + 1).padStart(2, '0')));
+  num.addEventListener('pointerdown', e => startDrag(e, li, i));
+  num.addEventListener('keydown', e => {
+    if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+    e.preventDefault();
+    const j = i + (e.key === 'ArrowUp' ? -1 : 1);
+    if (j < 0 || j >= rows.length) return;
+    reorder(i, j);
+    $('list').children[j]?.querySelector('.grip')?.focus();
+  });
   const th = el('span', 'thumb'); if (r.image) { const im = el('img'); im.src = fileUrl(r.image); im.alt = ''; im.loading = 'lazy'; th.append(im); }
   const info = el('div', 'info');
   const t = TYPE_LABEL[r.type] || r.type || '';
@@ -83,10 +95,8 @@ function rowEl(r, i) {
   status.type = 'button'; status.title = r.published ? 'Bấm để ẩn khỏi cửa tiệm' : 'Bấm để bày lên kệ';
   status.addEventListener('click', () => togglePublished(r, status));
   const act = el('div', 'act');
-  const up = iconBtn('↑', 'Đưa lên trước', () => move(i, -1)); up.disabled = i === 0;
-  const down = iconBtn('↓', 'Đưa ra sau', () => move(i, 1)); down.disabled = i === rows.length - 1;
   const edit = el('button', 'btn small', 'Sửa'); edit.type = 'button'; edit.addEventListener('click', () => openEditor(r));
-  act.append(up, down, edit);
+  act.append(edit);
   li.append(num, th, info, price, status, act);
   return li;
 }
@@ -97,14 +107,67 @@ async function togglePublished(r, btn) {
   catch (e) { toast(explain(e), true); btn.disabled = false; }
 }
 
-// Đổi chỗ hai món liền nhau rồi đánh số lại slot 0, 1, 2… cho cả kệ
-async function move(i, step) {
-  const j = i + step; if (j < 0 || j >= rows.length) return;
-  [rows[i], rows[j]] = [rows[j], rows[i]];
+// Chuyển món ở vị trí `from` tới vị trí `to`, rồi lưu lại thứ tự (chỉ ghi các món đổi chỗ)
+let saving = Promise.resolve();
+function reorder(from, to) {
+  if (from === to) return;
+  const [m] = rows.splice(from, 1); rows.splice(to, 0, m);
   renderList();
-  try { await renumber(); } catch (e) { toast(explain(e), true); await refresh(); }
+  saving = saving.then(renumber).then(() => toast('Đã lưu thứ tự trên kệ.'))
+    .catch(async e => { toast(explain(e), true); await refresh(); });
 }
+
+// Kéo thả bằng Pointer Events: chạy được cả chuột lẫn cảm ứng (kéo thả HTML5 không chạy trên điện thoại).
+// Món đang kéo đi theo con trỏ, các món khác trượt nhường chỗ; thả tay mới đổi thứ tự và lưu.
+function startDrag(e, li, from) {
+  if (e.pointerType === 'mouse' && e.button !== 0) return;
+  e.preventDefault();
+  const list = $('list'), items = [...list.children], grip = e.currentTarget;
+  const gapPx = parseFloat(getComputedStyle(list).rowGap) || 8;
+  const tops = items.map(n => n.getBoundingClientRect().top + scrollY);
+  const mids = items.map((n, k) => tops[k] + n.offsetHeight / 2);
+  const step = li.offsetHeight + gapPx;
+  const startY = e.clientY + scrollY;
+  let to = from, lastY = e.clientY, raf = 0, moved = false;
+  grip.setPointerCapture(e.pointerId);
+  li.classList.add('dragging'); list.classList.add('sorting'); document.body.classList.add('dragging-now');
+
+  function layout() {
+    const dy = lastY + scrollY - startY;
+    if (Math.abs(dy) > 3) moved = true;
+    li.style.transform = `translateY(${dy}px)`;
+    const center = mids[from] + dy;
+    to = from;
+    for (let k = from + 1; k < items.length; k++) if (center > mids[k]) to = k;
+    for (let k = from - 1; k >= 0; k--) if (center < mids[k]) to = k;
+    items.forEach((n, k) => {
+      if (k === from) return;
+      const shift = from < to && k > from && k <= to ? -step : from > to && k < from && k >= to ? step : 0;
+      n.style.transform = shift ? `translateY(${shift}px)` : '';
+    });
+  }
+  // kéo sát mép trên / dưới màn hình thì trang tự cuộn
+  function tick() {
+    const edge = 70, v = lastY < edge ? -(edge - lastY) / 4 : lastY > innerHeight - edge ? (lastY - innerHeight + edge) / 4 : 0;
+    if (v) { scrollBy(0, v); layout(); }
+    raf = requestAnimationFrame(tick);
+  }
+  raf = requestAnimationFrame(tick);
+  const onMove = ev => { lastY = ev.clientY; layout(); };
+  const onUp = () => {
+    cancelAnimationFrame(raf);
+    grip.removeEventListener('pointermove', onMove); grip.removeEventListener('pointerup', onUp); grip.removeEventListener('pointercancel', onUp);
+    list.classList.remove('sorting'); document.body.classList.remove('dragging-now');
+    items.forEach(n => { n.style.transform = ''; n.classList.remove('dragging'); });
+    if (moved) reorder(from, to);
+  };
+  grip.addEventListener('pointermove', onMove);
+  grip.addEventListener('pointerup', onUp);
+  grip.addEventListener('pointercancel', onUp);
+}
+
 async function renumber() {
+  // đánh số lại slot 0, 1, 2… theo thứ tự hiện tại
   const changed = rows.map((r, k) => [r, k]).filter(([r, k]) => r.slot !== k);
   await Promise.all(changed.map(async ([r, k]) => { await updateProduct(r.id, { slot: k }); r.slot = k; }));
 }

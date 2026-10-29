@@ -6,7 +6,7 @@ export const SETTINGS = {
   sequence: null,
 
   // Lấp các giá đỡ giày còn trống bằng giày mẫu (tắt khi đã có đủ sản phẩm thật)
-  fillDemoShoes: true,
+  fillDemoShoes: false,
 
   // Chiều dài đồ treo trên kệ theo loại (mét, từ điểm cao nhất tới gấu).
   // Mọi món cùng loại được ép về đúng chiều dài này, ảnh gốc to nhỏ hay thừa nền bao nhiêu cũng không ảnh hưởng.

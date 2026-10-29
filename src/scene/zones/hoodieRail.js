@@ -20,7 +20,8 @@ const RACK = {
   yaw: 0.62,       // góc xoay áo so với mặt tường (rad, ~35°): mặt áo hướng về phía cửa tiệm
   show: 0.6,       // mỗi áo lộ ra khoảng 60% bề ngang, phần còn lại nằm dưới áo bên cạnh
   gap: 0.015,      // khe hở tối thiểu giữa hai áo (m) để vải không xuyên vào nhau
-  max: 15          // số món tối đa trên thanh
+  max: 25,         // số món tối đa trên thanh
+  maxSpan: 6.2     // dãy áo dài quá mức này (m) thì treo xéo hơn, đè nhiều hơn cho gọn (như kệ đông hàng)
 };
 const TYPE_ORDER = { tee: 0, hoodie: 1, dress: 2 };
 
@@ -65,16 +66,21 @@ async function buildRack(metal) {
 
   // Khoảng cách giữa hai áo liền nhau: đủ để áo trước chỉ che một phần áo sau,
   // và đủ xa theo phương vuông góc để mặt sau áo này không chạm mặt trước áo kia.
-  const cos = Math.cos(RACK.yaw), sin = Math.sin(RACK.yaw);
-  const zs = [0];
-  for (let i = 1; i < hung.length; i++) {
-    const a = hung[i - 1].g.userData, b = hung[i].g.userData;
-    const byWidth = RACK.show * (a.width + b.width) / 2 * cos;
-    const byDepth = (a.back + b.front + RACK.gap) / sin;
-    zs.push(zs[i - 1] - Math.max(byWidth, byDepth));
+  // Kệ đông (dãy dài quá maxSpan): tăng dần góc xoay và giảm phần lộ ra cho tới khi vừa.
+  const layout = (yaw, show) => {
+    const cos = Math.cos(yaw), sin = Math.sin(yaw), zs = [0];
+    for (let i = 1; i < hung.length; i++) {
+      const a = hung[i - 1].g.userData, b = hung[i].g.userData;
+      zs.push(zs[i - 1] - Math.max(show * (a.width + b.width) / 2 * cos, (a.back + b.front + RACK.gap) / sin));
+    }
+    return zs;
+  };
+  let yaw = RACK.yaw, show = RACK.show, zs = layout(yaw, show);
+  for (let k = 1; k <= 8 && -zs[zs.length - 1] > RACK.maxSpan; k++) {
+    yaw = RACK.yaw + k * 0.05; show = RACK.show - k * 0.025; zs = layout(yaw, show);
   }
   const shift = RACK.center - (zs[0] + zs[zs.length - 1]) / 2;
-  hung.forEach((it, i) => hangGarment(it, RAIL_X, zs[i] + shift, i, metal));
+  hung.forEach((it, i) => hangGarment(it, RAIL_X, zs[i] + shift, i, metal, yaw));
 
   addEmptyHangers(metal, hung.length ? [zs[0] + shift + 0.5, zs[zs.length - 1] + shift - 0.5] : null);
   if (!hung.length) {
@@ -112,7 +118,7 @@ function addRackLight(span) {
 }
 
 // Một món trên móc: móc kim loại vòng qua thanh, vai gỗ, xoay xéo theo dãy.
-function hangGarment({ p: product, g: shirt }, x, z, index, metal) {
+function hangGarment({ p: product, g: shirt }, x, z, index, metal, yaw) {
   const { width, length, hanger, shadowMap, depthAt } = shirt.userData;
 
   // Điểm treo nằm đúng tâm thanh, cả món đồ đung đưa quanh điểm này
@@ -122,7 +128,7 @@ function hangGarment({ p: product, g: shirt }, x, z, index, metal) {
   const stemL = hanger.topDrop + hanger.barY - 0.03;
   const stem = new T.Mesh(new T.CylinderGeometry(0.004, 0.004, stemL, 6), metal); stem.position.y = -0.03 - stemL / 2; pivot.add(stem);
 
-  const body = new T.Group(); body.position.y = -hanger.topDrop; body.rotation.y = Math.PI / 2 - RACK.yaw; pivot.add(body);
+  const body = new T.Group(); body.position.y = -hanger.topDrop; body.rotation.y = Math.PI / 2 - yaw; pivot.add(body);
   body.add(shirt);
   // vai móc gỗ: áo/hoodie giấu bên trong; váy hai dây thì lộ ra ở cổ váy, dây vắt lên hai đầu
   const wood = std('#b9875a', 0.6), half = hanger.half, slope = hanger.strap ? 0.08 : 0.18;
@@ -134,7 +140,7 @@ function hangGarment({ p: product, g: shirt }, x, z, index, metal) {
   // máy yếu không đổ bóng thật: dùng tấm bóng mờ trên tường
   if (!SHADOWS) {
     const k = 1 + SHADOW_PAD * 2;
-    const sh = new T.Mesh(new T.PlaneGeometry(width * k * Math.cos(RACK.yaw), length * k),
+    const sh = new T.Mesh(new T.PlaneGeometry(width * k * Math.cos(yaw), length * k),
       new T.MeshBasicMaterial({ map: shadowMap, transparent: true, opacity: 0.3, depthWrite: false }));
     sh.position.set(-4.985, RAIL_Y - hanger.topDrop - length / 2 - 0.08, z); sh.rotation.y = Math.PI / 2; scene.add(sh);
   }

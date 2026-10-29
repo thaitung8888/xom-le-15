@@ -10,12 +10,14 @@ import { createScroll } from './ui/scroll.js';
 import { createHud } from './ui/hud.js';
 import { setLoad, finishLoad, paintLoaderBadge, fontsReady } from './ui/loader.js';
 import { loadCatalog } from './data/catalog.js';
+import { initRotateHint } from './ui/rotateHint.js';
 
 const sections = renderTrack(STATIONS, $('track'));
 const scroll = createScroll(sections);
 const hud = createHud(STATIONS, scroll);
 const canvas = $('scene');
 
+initRotateHint();   // điện thoại cầm dọc: gợi ý xoay ngang (hiện ngay cả lúc đang tải)
 paintLoaderBadge();
 setLoad(0.04);
 

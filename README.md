@@ -70,7 +70,7 @@ xom-le-15/
    │     ├─ alley.js           Con ngõ
    │     ├─ storefront.js      Mặt tiền kính, cửa trượt, biển neon
    │     ├─ shell.js           Vỏ tiệm: sàn, tường, trần, đèn chính
-   │     ├─ hoodieRail.js      Kệ áo: tối đa 15 món 2.5D xếp đè lên nhau
+   │     ├─ hoodieRail.js      Kệ áo: tối đa 25 món 2.5D xếp đè lên nhau
    │     ├─ skateCorner.js     Góc skate
    │     ├─ graffitiWall.js    Bức graffiti
    │     ├─ island.js          Đảo hàng mới
