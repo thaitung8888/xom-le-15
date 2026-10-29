@@ -2,6 +2,7 @@
 // Mỗi trạm gồm: chữ hiển thị ở góc màn hình và vị trí camera.
 //   camera.pos  : vị trí camera [x, y, z] (mét)
 //   camera.look : điểm camera nhìn vào
+//   cameraPortrait : (không bắt buộc) vị trí camera riêng cho màn hình dọc (điện thoại)
 //   side        : 'left' | 'right' — chú thích nằm góc trái hay phải
 // Trục toạ độ: z âm là đi sâu vào ngõ; mặt tiền kính ở z = -20, tường cuối tiệm ở z = -44.
 
@@ -31,6 +32,8 @@ export const STATIONS = [
     label: 'Kệ hoodie',
     side: 'right',
     camera: { pos: [0.1, 1.75, -27.3], look: [-5, 2.1, -27.8] },
+    // điện thoại: lùi về gần tường đối diện để thấy đủ cả dãy áo
+    cameraPortrait: { pos: [3.3, 1.7, -27.7], look: [-5, 1.75, -27.8] },
     title: 'Giá treo dọc tường trái, đang chờ hàng',
     body: 'Lô hoodie đầu tiên sắp lên kệ: nỉ bông 420gsm, form rộng.'
   },

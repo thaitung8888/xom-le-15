@@ -31,13 +31,49 @@
   <!-- Đường cuộn: các <section> được tạo từ src/config/stations.js -->
   <main id="track"></main>
 
-  <!-- Thẻ thông tin sản phẩm khi bấm chấm giá -->
-  <div class="card" id="card" hidden role="dialog" aria-label="Thông tin sản phẩm">
-    <button class="x" id="cardx" type="button" aria-label="Đóng">×</button>
-    <span class="k" id="cardk"></span>
-    <span class="n" id="cardn"></span>
-    <span class="p" id="cardp"></span>
-    <span class="m" id="cardm"></span>
+  <!-- Chi tiết sản phẩm: mở khi bấm vào món đồ hoặc chấm giá. Nội dung điền bằng src/ui/productDetail.js -->
+  <div class="detail" id="detail" hidden role="dialog" aria-modal="true" aria-labelledby="dName">
+    <header class="d-head">
+      <p class="d-title" id="dZone"></p>
+      <p class="d-sub" id="dSub"></p>
+    </header>
+    <div class="d-bar">
+      <span class="d-count" id="dCount"></span>
+      <span class="d-rail" aria-hidden="true"></span>
+      <button class="d-close" id="dClose" type="button">Đóng
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.5l9 9m0-9l-9 9"/></svg>
+      </button>
+    </div>
+    <div class="d-body">
+      <button class="d-nav prev" id="dPrev" type="button" aria-label="Món trước">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6l-6 6 6 6"/></svg>
+      </button>
+      <div class="d-stage">
+        <div class="d-ghosts" id="dGhosts" aria-hidden="true"></div>
+        <figure class="d-main" id="dMain">
+          <img id="dImg" alt="">
+          <div class="d-fallback" id="dFallback" hidden></div>
+        </figure>
+      </div>
+      <div class="d-info" id="dInfo">
+        <p class="d-kind" id="dKind"></p>
+        <h2 class="d-name" id="dName"></h2>
+        <span class="d-dash" aria-hidden="true"></span>
+        <p class="d-price" id="dPrice"></p>
+        <div class="d-views" id="dViews" role="group" aria-label="Các mặt của sản phẩm"></div>
+        <dl class="d-specs" id="dSpecs"></dl>
+        <p class="d-desc" id="dDesc"></p>
+        <div class="d-actions">
+          <a class="btn d-cta" id="dCta" target="_blank" rel="noopener" hidden>Nhắn tiệm giữ món này</a>
+          <button class="d-back" id="dBack" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6l-6 6 6 6"/></svg>Về cửa tiệm
+          </button>
+        </div>
+      </div>
+      <button class="d-nav next" id="dNext" type="button" aria-label="Món sau">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 6l6 6-6 6"/></svg>
+      </button>
+    </div>
   </div>
 
   <script type="module" src="/src/main.js"></script>

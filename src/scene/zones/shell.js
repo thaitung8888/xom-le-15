@@ -1,6 +1,6 @@
 // Vỏ tiệm: sàn terrazzo, tường bê tông, trần lam gỗ, ray đèn, đèn chính.
 import { BR } from '../../config/brand.js';
-import { T, scene, TX } from '../core.js';
+import { T, scene, TX, SHADOWS } from '../core.js';
 import { std, glow, box, plane, pool } from '../helpers.js';
 import { plant } from '../props/plant.js';
 import { canvasTex, grime } from '../textures/canvas.js';
@@ -9,12 +9,12 @@ export function buildShell() {
   const X = 5, Z0 = -20, Z1 = -44, H = 4.2, L = Z0 - Z1, zc = (Z0 + Z1) / 2;
   const wallTex = TX.concrete.clone(); wallTex.needsUpdate = true; wallTex.repeat.set(L / 2.4, H / 1.2);
   const wm = new T.MeshStandardMaterial({ map: wallTex, roughness: 0.92, color: '#e6e1da' });
-  plane(L, H, wm, -X, H / 2, zc, Math.PI / 2);
+  plane(L, H, wm, -X, H / 2, zc, Math.PI / 2).receiveShadow = SHADOWS;   // tường trái nhận bóng áo
   plane(L, H, wm, X, H / 2, zc, -Math.PI / 2);
   const bt = TX.concrete.clone(); bt.needsUpdate = true; bt.repeat.set(10 / 2.4, H / 1.2);
   plane(10, H, new T.MeshStandardMaterial({ map: bt, roughness: 0.9, color: '#6a58f0' }), 0, H / 2, Z1, 0);
   const f = new T.Mesh(new T.PlaneGeometry(10, L), new T.MeshStandardMaterial({ map: TX.floor, roughness: 0.35, metalness: 0.05 }));
-  f.rotation.x = -Math.PI / 2; f.position.set(0, 0.005, zc); scene.add(f);
+  f.rotation.x = -Math.PI / 2; f.position.set(0, 0.005, zc); f.receiveShadow = SHADOWS; scene.add(f);
   const c = new T.Mesh(new T.PlaneGeometry(10, L), std('#1b1820', 0.95)); c.rotation.x = Math.PI / 2; c.position.set(0, H, zc); scene.add(c);
   // trần lam gỗ (instanced)
   const slats = Math.floor(9.8 / 0.14), sg = new T.BoxGeometry(0.05, 0.08, L - 0.2);

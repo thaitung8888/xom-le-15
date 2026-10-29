@@ -4,6 +4,7 @@ import { BUILD_STEPS } from './zones/index.js';
 import { createCameraRig } from './cameraRig.js';
 import { createHotspots } from '../ui/hotspots.js';
 import { reduce } from '../env.js';
+import { detailProduct } from '../ui/productDetail.js';
 
 export function startScene({ canvas, stations, scroll, hud, onProgress, onReady }) {
   initCore(canvas);
@@ -15,12 +16,14 @@ export function startScene({ canvas, stations, scroll, hud, onProgress, onReady 
     // Dựng mỗi khu ở một khung hình riêng để thanh tải kịp cập nhật
     (function next() {
       if (i < BUILD_STEPS.length) {
-        BUILD_STEPS[i++]();
-        onProgress(0.1 + 0.85 * i / BUILD_STEPS.length);
-        requestAnimationFrame(next);
+        // Khu nào cần tải file (ảnh áo…) thì trả về Promise, chờ xong mới dựng khu tiếp theo
+        Promise.resolve(BUILD_STEPS[i++]()).then(() => {
+          onProgress(0.1 + 0.85 * i / BUILD_STEPS.length);
+          requestAnimationFrame(next);
+        });
         return;
       }
-      hs = createHotspots(hotspots);
+      hs = createHotspots(hotspots, camera);
       rig.fit(); scroll.measure();
       cur = scroll.target(); rig.place(cur);
       renderer.compile(scene, camera);
@@ -32,6 +35,8 @@ export function startScene({ canvas, stations, scroll, hud, onProgress, onReady 
 
   function loop(t) {
     requestAnimationFrame(loop);
+    // Đang xem chi tiết sản phẩm thì cảnh 3D bị che kín: ngừng vẽ cho nhẹ máy
+    if (detailProduct()) { last = t; return; }
     const dt = Math.min(0.1, (t - (last || t)) / 1000); last = t;
     const target = scroll.target();
     cur += (target - cur) * (reduce ? 1 : 1 - Math.exp(-dt * 4.2));

@@ -11,9 +11,10 @@ export const DECKS = ['Sọc chéo', 'Số 15', 'Ca rô', 'Mặt trời', 'Mèo 
 export const deckZ = i => -22.6 - i * 0.62;
 
 export function buildSkateCorner() {
+  const decks = [];
   DECKS.forEach((n, i) => {
     const m = new T.MeshStandardMaterial({ map: deckTex(i), transparent: true, alphaTest: 0.5, roughness: 0.55, side: T.DoubleSide });
-    const d = plane(0.21, 0.84, m, 4.93, 1.85, deckZ(i), -Math.PI / 2); d.rotation.z = rr(-0.015, 0.015);
+    const d = plane(0.21, 0.84, m, 4.93, 1.85, deckZ(i), -Math.PI / 2); d.rotation.z = rr(-0.015, 0.015); decks.push(d);
     box(0.06, 0.03, 0.05, std('#999', 0.3, 1), 4.97, 1.42, deckZ(i));
   });
   const wood = std('#6d4a2e', 0.6);
@@ -26,5 +27,6 @@ export function buildSkateCorner() {
   const cush = box(0.4, 0.08, 0.6, std(BR.purple, 0.95), 4.45, 0.54, -24.3); cush.rotation.y = 0.1;
   // Chấm giá cho các mặt ván có trong danh sách sản phẩm
   const stop = stationIndex('skate');
-  productsIn('skate').forEach(p => addHotspot({ stop, pos: new T.Vector3(4.85, 1.95, deckZ(p.slot)), product: p }));
+  // object: để bấm thẳng vào mặt ván; preview: hình in của ván, dùng làm ảnh trong khung chi tiết
+  productsIn('skate').forEach(p => addHotspot({ stop, pos: new T.Vector3(4.85, 1.95, deckZ(p.slot)), product: p, object: decks[p.slot], preview: decks[p.slot]?.material.map.image }));
 }

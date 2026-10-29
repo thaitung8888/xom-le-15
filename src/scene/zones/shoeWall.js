@@ -55,7 +55,7 @@ export function buildShoeWall() {
     if (!look) continue;
     const sh = shoeMesh(look.upper, look.sole, look.accent);
     sh.scale.setScalar(1.12); sh.position.set(x, y + 0.008, z + 0.085); sh.rotation.set(0, 0.32, 0.1); scene.add(sh);
-    if (product) addHotspot({ stop: stationIndex('tuong-giay'), pos: new T.Vector3(x, y + 0.26, z + 0.12), product });
+    if (product) addHotspot({ stop: stationIndex('tuong-giay'), pos: new T.Vector3(x, y + 0.26, z + 0.12), product, object: sh });
   }
   // đèn rọi tường giày + neon phía trên
   pool(0, 1.6, -43.9, 0, 7, 3.4, 0.2, 'rgba(255,240,215,1)');

@@ -4,7 +4,7 @@ Trang web 3D của tiệm streetwear **15 Xóm Lẻ**: người xem cuộn trang
 
 ## Chạy thử
 
-Cần Node.js 18 trở lên.
+Cần Node.js 18 trở lên. Sản phẩm lấy từ Supabase (xem mục **Cơ sở dữ liệu và trang quản trị** bên dưới).
 
 ```bash
 npm install
@@ -13,19 +13,27 @@ npm run build     # đóng gói ra thư mục dist/ để đưa lên mạng
 npm run preview   # xem thử bản đã đóng gói
 ```
 
+- Cửa tiệm: `http://localhost:5173/`
+- Trang quản trị: `http://localhost:5173/admin.html` (trên Vercel: `/admin`)
+
 ## Cấu trúc thư mục
 
 ```
 xom-le-15/
-├─ index.html                  Khung trang: canvas, màn tải, logo, thanh trạm, thẻ sản phẩm
-├─ public/                     File tĩnh (ảnh sản phẩm, chuỗi ảnh render sau này)
+├─ index.html                  Khung trang cửa tiệm: canvas, màn tải, logo, thanh trạm, khung chi tiết sản phẩm
+├─ admin.html                  Trang quản trị sản phẩm
+├─ vercel.json                 Cho phép mở /admin không cần đuôi .html
+├─ supabase/schema.sql         Tạo bảng, kho ảnh, phân quyền trên Supabase (chạy một lần)
+├─ scripts/prepare_image.py    (tuỳ chọn) xử lý ảnh bằng Python; trang admin đã tự làm việc này
+├─ public/products/            Ảnh 11 món mẫu (dùng khi nhập món mẫu và khi mất kết nối Supabase)
 └─ src/
    ├─ main.js                  Điểm vào: dựng giao diện rồi chọn chế độ vẽ nền
    ├─ env.js                   Thông tin môi trường (màn nhỏ, giảm chuyển động)
    │
    ├─ config/                  ★ NỘI DUNG — phần hay sửa nhất
    │  ├─ stations.js           10 trạm: chữ hiển thị + vị trí camera
-   │  ├─ products.js           Sản phẩm đang trưng bày (tên, giá, chỗ đặt, màu)
+   │  ├─ products.js           Sản phẩm MẪU / dự phòng (sản phẩm thật nằm trên Supabase)
+   │  ├─ supabase.js           Địa chỉ project Supabase + publishable key
    │  ├─ brand.js              Màu thương hiệu, phông chữ cần tải
    │  └─ settings.js           Cài đặt chung (chuỗi ảnh Blender, giày mẫu, hạt ngẫu nhiên)
    │
@@ -36,13 +44,16 @@ xom-le-15/
    │  ├─ caption.css           Chú thích cố định ở góc dưới
    │  └─ product.css           Chấm giá và thẻ sản phẩm
    │
+   ├─ data/catalog.js          Tải sản phẩm từ Supabase cho cửa tiệm (có dự phòng)
+   ├─ admin/                   Trang quản trị: main.js (giao diện), api.js (Supabase), image.js (xử lý ảnh)
+   │
    ├─ ui/                      Giao diện HTML (không dính tới 3D)
    │  ├─ sections.js           Tạo các <section> và nội dung chú thích từ stations.js
    │  ├─ scroll.js             Đổi vị trí cuộn thành tiến độ qua các trạm
    │  ├─ hud.js                Phần trăm, thanh trạm, đổi chú thích
    │  ├─ loader.js             Màn hình tải, chờ phông chữ
-   │  ├─ hotspots.js           Chấm giá: chiếu điểm 3D ra màn hình
-   │  └─ productCard.js        Thẻ thông tin sản phẩm
+   │  ├─ hotspots.js           Chấm giá + bấm thẳng vào món đồ trong cảnh 3D
+   │  └─ productDetail.js      Khung chi tiết sản phẩm toàn màn hình
    │
    ├─ brand/logo.js            Hàm vẽ logo vòm (dùng cho màn tải, texture, poster)
    │
@@ -53,13 +64,13 @@ xom-le-15/
    │  ├─ helpers.js            Hàm dựng nhanh: vật liệu, hộp, mặt phẳng, quầng sáng
    │  ├─ random.js             Số ngẫu nhiên có hạt giống (cảnh lần nào cũng giống nhau)
    │  ├─ textures/             Texture vẽ bằng canvas: tường ngõ, graffiti, ván, poster, neon…
-   │  ├─ props/                Đồ vật dùng lại: chậu cây, ghế, dây điện, giày, rèm
+   │  ├─ props/                Đồ vật dùng lại: chậu cây, ghế, dây điện, giày, rèm, garment.js (áo 2.5D từ ảnh)
    │  └─ zones/                ★ Mỗi khu trong tiệm một file
    │     ├─ index.js           Danh sách và thứ tự dựng các khu
    │     ├─ alley.js           Con ngõ
    │     ├─ storefront.js      Mặt tiền kính, cửa trượt, biển neon
    │     ├─ shell.js           Vỏ tiệm: sàn, tường, trần, đèn chính
-   │     ├─ hoodieRail.js      Kệ hoodie
+   │     ├─ hoodieRail.js      Kệ áo: tối đa 15 món 2.5D xếp đè lên nhau
    │     ├─ skateCorner.js     Góc skate
    │     ├─ graffitiWall.js    Bức graffiti
    │     ├─ island.js          Đảo hàng mới
@@ -79,7 +90,9 @@ Quy ước chia lớp: **config** chỉ chứa dữ liệu, **ui** chỉ lo HTML
 
 **Chỉnh góc máy** — sửa `camera.pos` (vị trí) và `camera.look` (điểm nhìn) của trạm đó. Trục toạ độ: `z` âm là đi sâu vào ngõ, mặt tiền kính ở `z = -20`, tường cuối tiệm ở `z = -44`, `x` âm là tường trái.
 
-**Thêm hoặc sửa sản phẩm** — thêm một mục vào `src/config/products.js`:
+**Thêm hoặc sửa sản phẩm trên kệ áo** — dùng trang quản trị `/admin` (xem mục bên dưới), không cần sửa code.
+
+**Sản phẩm ở góc skate / tường giày** (chưa chuyển sang cơ sở dữ liệu) — thêm một mục vào `src/config/products.js`:
 
 ```js
 {
@@ -96,6 +109,28 @@ Quy ước chia lớp: **config** chỉ chứa dữ liệu, **ui** chỉ lo HTML
 Sản phẩm có trong danh sách sẽ tự hiện chấm giá. Các khu đang nhận sản phẩm: `skate` (slot 0–7) và `shoes` (giá đỡ trên tường giày, đánh số từ 0 theo hàng từ dưới lên, mỗi hàng từ trái sang phải). Khi đủ giày thật, đặt `fillDemoShoes: false` trong `settings.js` để bỏ giày mẫu.
 
 **Thêm một khu mới** — tạo file trong `src/scene/zones/`, export một hàm `buildTenKhu()`, rồi thêm hàm đó vào `BUILD_STEPS` trong `zones/index.js`. Hiệu ứng chạy mỗi khung hình thì đăng ký bằng `onFrame(fn)` từ `scene/core.js`.
+
+## Cơ sở dữ liệu và trang quản trị
+
+Sản phẩm trên kệ áo được lưu trên **Supabase** (cơ sở dữ liệu Postgres + kho ảnh + đăng nhập).
+
+**Cài đặt lần đầu** (đã làm một lần cho project hiện tại):
+1. Tạo project trên supabase.com (Region Singapore).
+2. SQL Editor → dán `supabase/schema.sql` → Run.
+3. Authentication → Users → Add user (tick Auto Confirm), rồi chạy dòng `insert into public.admins …` ở cuối file SQL với email đó.
+4. Authentication → Sign In / Providers → tắt "Allow new users to sign up".
+5. Điền Project URL và publishable key vào `src/config/supabase.js` (hoặc biến môi trường `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`).
+
+**Dùng trang quản trị** (`/admin`): đăng nhập → lần đầu bấm "Nhập 11 món mẫu" → thêm / sửa / xoá / ẩn hiện / đổi thứ tự.
+Ảnh tải lên được tự xử lý trong trình duyệt: xoá nền trơn (ảnh JPG nền trắng, xám), cắt sát viền, thu nhỏ còn 1024px, lưu WebP.
+Ảnh đẹp nhất: chụp chính diện, cao từ 1000px, nền đã xoá hoặc nền trơn khác màu áo.
+
+**Cửa tiệm đọc dữ liệu thế nào** (`src/data/catalog.js`): kệ áo luôn lấy từ Supabase (kể cả khi trống); góc skate và tường giày vẫn dùng `src/config/products.js`.
+Nếu không kết nối được Supabase, cửa tiệm dùng tạm danh sách mẫu để không bao giờ trống.
+
+**Bảo mật**: publishable key nằm công khai trong trang là bình thường. Quyền do phân quyền (RLS) trong `schema.sql` quyết định:
+ai cũng chỉ đọc được món đang bày; thêm / sửa / xoá phải đăng nhập bằng tài khoản có tên trong bảng `admins`.
+Không bao giờ đưa secret key (`sb_secret_…`) hay mật khẩu database vào code.
 
 ## Chuyển sang bản render Blender
 
@@ -117,8 +152,6 @@ Chữ, thanh trạm và hiệu ứng dừng ở mỗi trạm giữ nguyên.
 
 ## Hướng phát triển tiếp
 
-- Quản lý sản phẩm: lưu `products.js` vào cơ sở dữ liệu, thêm trang quản trị để thêm/sửa/xoá sản phẩm và tải ảnh.
-- Gắn ảnh sản phẩm thật lên poster và thẻ sản phẩm.
-- Thêm chỗ trưng bày cho kệ hoodie (`zone: 'hoodie'`) và đảo hàng mới (`zone: 'island'`).
+- Chuyển góc skate và tường giày sang cơ sở dữ liệu + trang quản trị.
+- Thêm chỗ trưng bày cho đảo hàng mới (`zone: 'island'`).
 - Tối ưu cho điện thoại: gộp vật thể tĩnh, giảm đèn, tự hạ chất lượng khi máy yếu.
-# xom-le-15

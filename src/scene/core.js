@@ -6,6 +6,8 @@ import { small } from '../env.js';
 export const T = THREE;
 export let renderer, scene, camera;
 export let maxAniso = 1;
+// Đổ bóng thật (đèn rọi kệ áo). Tắt trên màn nhỏ cho nhẹ, khi đó dùng bóng giả vẽ sẵn.
+export const SHADOWS = !small;
 
 export function initCore(canvas) {
   renderer = new T.WebGLRenderer({ canvas, antialias: devicePixelRatio < 2, powerPreference: 'high-performance' });
@@ -15,6 +17,8 @@ export function initCore(canvas) {
   renderer.toneMapping = T.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.15;
   maxAniso = renderer.capabilities.getMaxAnisotropy();
+  renderer.shadowMap.enabled = SHADOWS;
+  renderer.shadowMap.type = T.PCFSoftShadowMap;
 
   scene = new T.Scene();
   const night = new T.Color('#0f0e18');

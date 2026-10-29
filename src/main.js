@@ -9,6 +9,7 @@ import { renderTrack } from './ui/sections.js';
 import { createScroll } from './ui/scroll.js';
 import { createHud } from './ui/hud.js';
 import { setLoad, finishLoad, paintLoaderBadge, fontsReady } from './ui/loader.js';
+import { loadCatalog } from './data/catalog.js';
 
 const sections = renderTrack(STATIONS, $('track'));
 const scroll = createScroll(sections);
@@ -25,7 +26,8 @@ function runUIOnly() {
   (function tick() { requestAnimationFrame(tick); hud.update(scroll.target()); })();
 }
 
-fontsReady(FONTS_TO_LOAD).then(async () => {
+// Chờ phông chữ và danh sách sản phẩm (Supabase) cùng lúc rồi mới dựng cảnh
+Promise.all([fontsReady(FONTS_TO_LOAD), loadCatalog()]).then(async () => {
   paintLoaderBadge();
   if (SETTINGS.sequence) {
     const { startSequence } = await import('./sequence/player.js');

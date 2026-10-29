@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Quản trị · 15 Xóm Lẻ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Montserrat:wght@800;900&display=swap">
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="./"><span class="n">15</span>XÓM LẺ<span class="tag">Quản trị</span></a>
+    <nav class="top-r">
+      <a class="link" href="./" target="_blank" rel="noopener">Xem cửa tiệm ↗</a>
+      <span class="who" id="who" hidden></span>
+      <button class="link" id="logout" type="button" hidden>Đăng xuất</button>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <p class="boot" id="boot">Đang kết nối…</p>
+
+    <!-- Đăng nhập -->
+    <section class="card login" id="login" hidden>
+      <h1>Đăng nhập quản trị</h1>
+      <p class="muted">Dùng tài khoản đã tạo trong Supabase → Authentication → Users.</p>
+      <form id="loginForm" novalidate>
+        <label class="field"><span>Email</span><input type="email" name="email" autocomplete="username" required></label>
+        <label class="field"><span>Mật khẩu</span><input type="password" name="password" autocomplete="current-password" required></label>
+        <p class="err" id="loginErr" role="alert"></p>
+        <button class="btn primary" type="submit">Đăng nhập</button>
+      </form>
+    </section>
+
+    <!-- Đăng nhập được nhưng không có quyền -->
+    <section class="card" id="denied" hidden>
+      <h1>Tài khoản chưa có quyền quản trị</h1>
+      <p class="muted">Vào Supabase → SQL Editor và chạy dòng sau (thay đúng email):</p>
+      <pre class="code" id="deniedSql"></pre>
+      <button class="btn" id="deniedRetry" type="button">Đã chạy, thử lại</button>
+    </section>
+
+    <!-- Danh sách sản phẩm -->
+    <section id="panel" hidden>
+      <div class="head">
+        <div>
+          <p class="eyebrow">Khu trưng bày</p>
+          <h1>Kệ áo</h1>
+          <p class="muted" id="count"></p>
+        </div>
+        <button class="btn primary" id="addBtn" type="button">+ Thêm sản phẩm</button>
+      </div>
+
+      <div class="banner" id="seedBox" hidden>
+        <div>
+          <strong>Kệ đang trống.</strong>
+          <span>Nhập 11 món mẫu đang có trong code (kèm ảnh) để bắt đầu nhanh, sau đó sửa tên, giá cho đúng.</span>
+        </div>
+        <button class="btn" id="seedBtn" type="button">Nhập 11 món mẫu</button>
+      </div>
+
+      <ol class="list" id="list"></ol>
+      <p class="muted small">Thứ tự trong danh sách là thứ tự trên kệ, từ phía cửa vào trong. Kệ treo tối đa 15 món đang bày.
+        Ván trượt và giày vẫn dùng dữ liệu mẫu trong code.</p>
+    </section>
+  </main>
+
+  <!-- Thêm / sửa sản phẩm -->
+  <dialog class="editor" id="editor" aria-labelledby="edTitle">
+    <form id="form" novalidate>
+      <header class="ed-head">
+        <h2 id="edTitle">Thêm sản phẩm</h2>
+        <button class="x" type="button" data-close aria-label="Đóng">×</button>
+      </header>
+
+      <div class="ed-body">
+        <div class="ed-media">
+          <span class="lbl">Ảnh chính <em>*</em></span>
+          <label class="drop" id="drop">
+            <input type="file" id="mainFile" accept="image/png,image/jpeg,image/webp">
+            <img id="mainPreview" alt="" hidden>
+            <span class="drop-hint" id="dropHint">Kéo thả hoặc bấm để chọn ảnh<br><small>Chụp chính diện, PNG đã xoá nền là đẹp nhất. Ảnh JPG nền trơn sẽ được tự xoá nền.</small></span>
+          </label>
+          <p class="hint" id="mainInfo"></p>
+
+          <span class="lbl">Ảnh các mặt khác <small>(không bắt buộc)</small></span>
+          <div class="views" id="views"></div>
+          <label class="btn small ghost add-view">+ Thêm ảnh mặt khác
+            <input type="file" id="viewFile" accept="image/png,image/jpeg,image/webp" hidden>
+          </label>
+        </div>
+
+        <div class="ed-fields">
+          <label class="field"><span>Tên sản phẩm <em>*</em></span><input name="name" required maxlength="80" placeholder="Áo thun Hồng Phấn"></label>
+          <div class="row2">
+            <label class="field"><span>Loại <em>*</em></span>
+              <select name="type" required>
+                <option value="tee">Áo thun · polo · áo đấu</option>
+                <option value="hoodie">Hoodie</option>
+                <option value="dress">Váy</option>
+              </select>
+            </label>
+            <label class="field"><span>Giá (đồng) <em>*</em></span><input name="price" inputmode="numeric" required placeholder="250000"><small class="hint" id="pricePreview"></small></label>
+          </div>
+          <div class="row2">
+            <label class="field"><span>Dòng phụ</span><input name="kind" maxlength="60" placeholder="Áo thun · oversize"></label>
+            <label class="field"><span>Thương hiệu</span><input name="brand" maxlength="40"></label>
+          </div>
+          <fieldset class="field sizes">
+            <legend>Size</legend>
+            <div class="chips" id="sizeChips"></div>
+            <input name="sizesExtra" placeholder="Size khác, cách nhau dấu phẩy (ví dụ 39, 40, 41)">
+          </fieldset>
+          <div class="row3">
+            <label class="field"><span>Chất liệu</span><input name="material" maxlength="80"></label>
+            <label class="field"><span>Màu</span><input name="color" maxlength="60"></label>
+            <label class="field"><span>Form</span><input name="fit" maxlength="60"></label>
+          </div>
+          <label class="field"><span>Mô tả</span><textarea name="description" rows="4" maxlength="600" placeholder="Vài câu kể về món đồ: chất vải, cách phối, câu chuyện…"></textarea></label>
+          <label class="check"><input type="checkbox" name="published" checked> Đang bày trên kệ (bỏ chọn để ẩn khỏi cửa tiệm)</label>
+        </div>
+      </div>
+
+      <footer class="ed-foot">
+        <button class="btn danger ghost" id="delBtn" type="button" hidden>Xoá món này</button>
+        <p class="err" id="formErr" role="alert"></p>
+        <button class="btn ghost" type="button" data-close>Huỷ</button>
+        <button class="btn primary" id="saveBtn" type="submit">Lưu</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script type="module" src="/src/admin/main.js"></script>
+</body>
+</html>
