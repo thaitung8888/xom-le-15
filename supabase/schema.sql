@@ -39,11 +39,13 @@ create table if not exists public.products (
   images      jsonb not null default '[]',                        -- nhiều mặt: [{ "src": "...", "label": "Mặt sau" }]
   look        jsonb,                                              -- màu dựng mô hình giày
   published   boolean not null default true,                      -- false = ẩn khỏi cửa tiệm, vẫn giữ trong admin
+  featured    boolean not null default false,                     -- món nổi bật trên đảo giữa tiệm (tối đa 1 món)
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now()
 );
 
 create index if not exists products_zone_slot on public.products (zone, slot);
+create unique index if not exists products_one_featured on public.products (featured) where featured;
 
 create or replace function public.touch_updated_at()
 returns trigger language plpgsql as $$ begin new.updated_at = now(); return new; end $$;

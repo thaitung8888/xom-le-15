@@ -96,9 +96,30 @@ function rowEl(r, i) {
   status.addEventListener('click', () => togglePublished(r, status));
   const act = el('div', 'act');
   const edit = el('button', 'btn small', 'Sửa'); edit.type = 'button'; edit.addEventListener('click', () => openEditor(r));
-  act.append(edit);
+  // ★ món nổi bật trên đảo giữa tiệm (chỉ một món; chọn món khác thì món cũ tự bỏ)
+  const star = el('button', 'star' + (r.featured ? ' on' : ''), '★');
+  star.type = 'button'; star.title = r.featured ? 'Đang là món nổi bật · bấm để bỏ' : 'Chọn làm món nổi bật trên đảo giữa tiệm';
+  star.setAttribute('aria-pressed', !!r.featured); star.setAttribute('aria-label', star.title);
+  star.addEventListener('click', () => toggleFeatured(r, star));
+  act.append(star, edit);
   li.append(num, th, info, price, status, act);
   return li;
+}
+
+async function toggleFeatured(r, btn) {
+  btn.disabled = true;
+  const on = !r.featured;
+  try {
+    // bỏ chọn món đang nổi bật trước (cơ sở dữ liệu chỉ cho phép một món), rồi chọn món này
+    for (const o of rows.filter(o => o.featured && o.id !== r.id)) { await updateProduct(o.id, { featured: false }); o.featured = false; }
+    Object.assign(r, await updateProduct(r.id, { featured: on }));
+    renderList();
+    toast(on ? `"${r.name}" là món nổi bật trên đảo giữa tiệm.` : 'Đã bỏ món nổi bật.');
+  } catch (e) {
+    const m = explain(e);
+    toast(/featured/.test(m) ? 'Supabase chưa có cột "featured": chạy file supabase/fix-02-noi-bat.sql trong SQL Editor.' : m, true);
+    btn.disabled = false;
+  }
 }
 
 async function togglePublished(r, btn) {
@@ -184,7 +205,7 @@ $('seedBtn').addEventListener('click', async () => {
       const blob = await (await fetch(assetUrl(p.image))).blob();
       const path = await uploadImage(p.id, blob, 'mau', true);
       const { zone, type, slot, name, kind, brand, price, sizes, material, color, fit, description, meta } = p;
-      await upsertProduct(clean({ id: p.id, zone, type, slot, name, kind, brand, price, sizes, material, color, fit, description, meta, image: path, images: [], published: true }));
+      await upsertProduct(clean({ id: p.id, zone, type, slot, name, kind, brand, price, sizes, material, color, fit, description, meta, image: path, images: [], published: true, featured: !!p.featured }));
       done++;
     }
     toast(`Đã nhập ${done} món mẫu.`);

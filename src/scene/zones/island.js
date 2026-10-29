@@ -1,7 +1,13 @@
-// Khu đảo hàng mới: sàn in, bục khối, khung lưới + poster, đèn tuýp.
+// Khu đảo giữa tiệm: sàn in, bục khối, khung lưới + poster, đèn tuýp,
+// và MÓN NỔI BẬT (chọn bằng nút ★ trong admin) đứng trên giá xoay ở bục chính.
 import { drawBadge } from '../../brand/logo.js';
 import { BR } from '../../config/brand.js';
-import { T, scene, TX } from '../core.js';
+import { T, scene, TX, addHotspot, onFrame } from '../core.js';
+import { featuredProduct } from '../../config/products.js';
+import { SETTINGS } from '../../config/settings.js';
+import { stationIndex } from '../../config/stations.js';
+import { assetUrl, reduce } from '../../env.js';
+import { loadGarment } from '../props/garment.js';
 import { std, glow, box, plane, pool } from '../helpers.js';
 import { cardTex } from '../textures/brand.js';
 import { canvasTex, grime } from '../textures/canvas.js';
@@ -51,9 +57,14 @@ export function buildIsland() {
   box(0.75, 0.38, 0.52, dark, IX - 0.6, 0.06 + 0.19, IZ + 0.55);
   box(0.46, 0.86, 0.46, std(BR.purple, 0.55), IX + 1.05, 0.06 + 0.43, IZ - 0.75);
   box(0.46, 0.02, 0.46, std(BR.yellow, 0.4), IX + 1.05, 0.93, IZ - 0.75);
-  // thẻ "hàng mới" trên bục cao nhất + ván skate dựa vào bục
-  const card = plane(0.46, 0.27, new T.MeshStandardMaterial({ map: cardTex('HÀNG MỚI', 'Về sáng thứ Sáu'), roughness: 0.8 }), IX + 0.35, 1.0, IZ + 0.1, 0.26);
-  card.rotation.x = -0.25;
+  // món nổi bật đứng trên bục chính (bục gỗ trên khối lỗ); chưa chọn món nào thì đặt thẻ "nổi bật" như cũ
+  const hero = featuredProduct();
+  let heroP = Promise.resolve();
+  if (hero) heroP = buildFeatured(hero, IX + 0.35, 0.84, IZ - 0.05).catch(e => console.warn(e));
+  else {
+    const card = plane(0.46, 0.27, new T.MeshStandardMaterial({ map: cardTex('NỔI BẬT', 'Sắp lên đảo'), roughness: 0.8 }), IX + 0.35, 1.0, IZ + 0.1, 0.26);
+    card.rotation.x = -0.25;
+  }
   const deck = plane(0.21, 0.84, new T.MeshStandardMaterial({ map: deckTex(3), transparent: true, alphaTest: 0.5, roughness: 0.55, side: T.DoubleSide }), IX - 0.25, 0.47, IZ + 0.5, 0.35);
   deck.rotation.x = -0.32;
   box(0.3, 0.2, 0.22, std(BR.yellow, 0.7), IX - 0.72, 0.54, IZ + 0.55);
@@ -111,4 +122,42 @@ export function buildIsland() {
   });
   const il = new T.PointLight('#f1efff', 1.25, 6.5, 1.5); il.position.set(IX, 2.9, IZ); scene.add(il);
   pool(IX, 0.075, IZ, 0, 3.4, 3.4, 0.12, 'rgba(255,255,255,1)').rotation.x = -Math.PI / 2;
+  return heroP;
+}
+
+// Món nổi bật: mâm xoay đen trên bục, giá đứng inox, áo 2.5D treo trên giá, đèn rọi riêng.
+// Áo chỉ có ảnh mặt trước nên mâm lắc qua lại (±30°) quanh hướng nhìn của camera, không quay hết vòng.
+async function buildFeatured(p, x, topY, z) {
+  const type = SETTINGS.garmentLengths[p.type] ? p.type : 'tee';
+  const shirt = await loadGarment(assetUrl(p.image), type, SETTINGS.garmentLengths[type]);
+  const { length, hanger } = shirt.userData;
+  const chrome = std('#d9dbe0', 0.18, 1);
+
+  const turn = new T.Group(); turn.position.set(x, topY, z); scene.add(turn);
+  const disc = new T.Mesh(new T.CylinderGeometry(0.29, 0.3, 0.035, 48), std('#141217', 0.35, 0.3)); disc.position.y = 0.0175; turn.add(disc);
+  const ring = new T.Mesh(new T.TorusGeometry(0.295, 0.006, 6, 48), glow(BR.yellow, 1.2)); ring.rotation.x = Math.PI / 2; ring.position.y = 0.036; turn.add(ring);
+  const base = new T.Mesh(new T.CylinderGeometry(0.15, 0.16, 0.02, 32), chrome); base.position.y = 0.045; turn.add(base);
+  // áo đặt sao cho gấu cách mâm ít nhất 12 cm; giá cao theo áo
+  const shirtTop = 0.055 + 0.12 + length + hanger.topDrop * 0.3;
+  const poleTop = shirtTop - hanger.barY;
+  const pole = new T.Mesh(new T.CylinderGeometry(0.011, 0.011, poleTop - 0.055, 12), chrome); pole.position.y = 0.055 + (poleTop - 0.055) / 2; turn.add(pole);
+  const bar = new T.Mesh(new T.CylinderGeometry(0.009, 0.009, hanger.half * 2, 10), chrome); bar.rotation.z = Math.PI / 2; bar.position.y = poleTop; turn.add(bar);
+  shirt.position.y = shirtTop; turn.add(shirt);
+
+  // đèn rọi từ trên xuống món nổi bật
+  const spot = new T.SpotLight('#fff3e0', 2.4, 6, 0.38, 0.55, 1.2);
+  spot.position.set(x + 0.6, 3.2, z + 0.9); spot.target = shirt; scene.add(spot);
+
+  // hướng nhìn từ camera trạm "Món nổi bật" tới bục → mặt áo quay về phía đó, rồi lắc qua lại
+  const cam = new T.Vector3(1.15, 1.85, -28.45);
+  const face = Math.atan2(cam.x - x, cam.z - z);
+  turn.rotation.y = face;
+  if (!reduce) onFrame(t => { turn.rotation.y = face + 0.52 * Math.sin(t / 1000 * 0.35); });
+
+  turn.updateMatrixWorld(true);
+  addHotspot({
+    stop: stationIndex('hang-moi'),
+    pos: new T.Vector3(x, topY + shirtTop - length * 0.62, z).add(new T.Vector3(Math.sin(face), 0, Math.cos(face)).multiplyScalar(0.1)),
+    product: { ...p, zone: 'featured' }, object: shirt
+  });
 }

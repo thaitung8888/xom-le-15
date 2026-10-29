@@ -47,11 +47,11 @@ export const STATIONS = [
   },
   {
     id: 'hang-moi',
-    label: 'Hàng mới',
+    label: 'Món nổi bật',
     side: 'right',
-    camera: { pos: [1.7, 2.15, -27.3], look: [-1.0, 1.1, -31.8] },
-    title: 'Về mỗi sáng thứ Sáu',
-    body: 'Đảo trưng bày giữa tiệm: bục khối xếp chồng, khung lưới sắt, poster của xóm. Hàng về là lên đây trước.'
+    camera: { pos: [1.15, 1.85, -28.45], look: [-0.6, 1.45, -31.55] },
+    title: 'Món tiệm chọn tuần này',
+    body: 'Một món duy nhất trên đảo giữa tiệm, xoay chậm dưới đèn. Bấm vào để xem chi tiết.'
   },
   {
     id: 'buc-tuong',

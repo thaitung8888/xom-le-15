@@ -5,7 +5,7 @@ import { $, assetUrl as url } from '../env.js';
 import { formatPrice } from '../config/products.js';
 import { SETTINGS } from '../config/settings.js';
 
-const ZONE_TITLES = { hoodie: 'Kệ áo', collection: 'Góc sưu tầm', shoes: 'Tường giày' };
+const ZONE_TITLES = { hoodie: 'Kệ áo', featured: 'Món nổi bật', collection: 'Góc sưu tầm', shoes: 'Tường giày' };
 const SPEC_ROWS = [['material', 'Chất liệu'], ['color', 'Màu'], ['fit', 'Form']];
 const GHOSTS = 3;   // số món kế tiếp hiện mờ phía sau
 const touch = matchMedia('(hover: none)').matches;

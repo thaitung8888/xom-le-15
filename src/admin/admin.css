@@ -119,6 +119,12 @@ body.dragging-now, body.dragging-now * { cursor: grabbing !important; user-selec
 }
 .pill.on { background: #e5f4ec; border-color: #b7dfc8; color: var(--ok); }
 .act { display: flex; gap: 6px; align-items: center; }
+.star {
+  width: 34px; height: 32px; border-radius: 8px; border: 1.5px solid var(--line); background: #fff; color: #c9c3d6;
+  font-size: 17px; line-height: 1; cursor: pointer;
+}
+.star:hover { color: #e3a900; border-color: #f0d98a; }
+.star.on { background: #fff6d6; border-color: #f0d98a; color: #e3a900; }
 
 /* hộp thêm / sửa */
 .editor {

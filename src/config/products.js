@@ -11,6 +11,7 @@
 //   type : (khu hoodie) 'tee' áo thun/polo/áo đấu · 'hoodie' · 'dress' váy — quyết định chiều dài
 //          (xem garmentLengths trong settings.js) và độ phồng
 //   slot : (khu hoodie) thứ tự trên thanh, số nhỏ ở phía cửa. Bỏ trống thì tự xếp: thun → hoodie → váy
+//   featured: true = món nổi bật trên đảo giữa tiệm (chỉ một món)
 //   image: (khu hoodie) ảnh chụp chính diện đã xoá nền, đặt trong public/products/
 //          (dùng scripts/prepare_image.py để xoá nền trơn, cắt sát viền và thu nhỏ)
 //   Thông tin hiện trong khung chi tiết (đều không bắt buộc):
@@ -27,7 +28,7 @@ import { BR } from './brand.js';
 export const PRODUCTS = [
   {
     id: 'thun-nirvana',
-    zone: 'hoodie', type: 'tee', slot: 0,
+    zone: 'hoodie', type: 'tee', slot: 0, featured: true,
     image: 'products/thun-nirvana.webp',
     kind: 'Áo thun · oversize',
     name: 'Áo thun In Utero Tour ’93',
@@ -176,6 +177,9 @@ export const setActiveProducts = list => { active = list; };
 
 // Sản phẩm thuộc một khu trưng bày
 export const productsIn = zone => active.filter(p => p.zone === zone);
+
+// Món nổi bật (chọn bằng nút ★ trong trang admin), đặt trên đảo giữa tiệm. Không có thì trả về null.
+export const featuredProduct = () => active.find(p => p.featured && p.image) || null;
 
 // Định dạng giá kiểu Việt Nam: 1150000 → "1.150.000₫"
 export const formatPrice = n => n.toLocaleString('vi-VN') + '₫';
