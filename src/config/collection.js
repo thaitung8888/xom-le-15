@@ -42,9 +42,14 @@ export const BALLS = [
   }
 ];
 
-// Khung áo đấu có chữ ký, từ trái sang phải. Cùng chiều cao, bề ngang theo tỉ lệ ảnh.
+// Khung áo đấu, từ trái sang phải. Cùng chiều cao, bề ngang tự tính.
+// Có hai kiểu, chọn ở dòng FRAMES cuối file:
+//   KHUNG_ANH_CHUP : ảnh chụp sẵn cả cái khung ngoài đời (image) → dùng nguyên ảnh làm mặt khung
+//   KHUNG_AO_TU_DUNG: ảnh áo đã xoá nền (jersey) → tự dựng khung hộp sâu, áo 2.5D bên trong, bảng đồng khắc tên
 export const FRAME_HEIGHT = 1.0;     // mét
-export const FRAMES = [
+export const JERSEY_FRAME_RATIO = 0.82;   // khung tự dựng: rộng = cao × tỉ lệ này (mọi khung cùng cỡ)
+
+export const KHUNG_ANH_CHUP = [
   {
     id: 'khung-ronaldo',
     image: 'collection/khung-ronaldo.webp',
@@ -62,3 +67,27 @@ export const FRAMES = [
     description: 'Áo sọc trắng xanh số 10 của đội tuyển Argentina, có chữ ký của Messi.'
   }
 ];
+
+export const KHUNG_AO_TU_DUNG = [
+  {
+    id: 'ao-ronaldo-mu',
+    jersey: 'collection/ao-ronaldo-mu.webp',
+    plaque: ['CRISTIANO RONALDO', 'Manchester United · 7'],
+    kind: 'Áo đấu đóng khung',
+    name: 'Cristiano Ronaldo · Manchester United',
+    facts: [['Cầu thủ', 'Cristiano Ronaldo'], ['Câu lạc bộ', 'Manchester United'], ['Số áo', '7']],
+    description: 'Áo đỏ tay dài số 7 của Manchester United, mặt lưng in tên RONALDO.'
+  },
+  {
+    id: 'ao-messi-argentina',
+    jersey: 'collection/ao-messi-argentina.webp',
+    plaque: ['LIONEL MESSI', 'Argentina · 10'],
+    kind: 'Áo đấu đóng khung',
+    name: 'Lionel Messi · Argentina',
+    facts: [['Cầu thủ', 'Lionel Messi'], ['Đội tuyển', 'Argentina'], ['Số áo', '10']],
+    description: 'Áo sọc trắng xanh số 10 của đội tuyển Argentina, mặt lưng in tên MESSI.'
+  }
+];
+
+// Kiểu khung đang dùng: đổi thành KHUNG_ANH_CHUP để quay lại bản ảnh chụp cả khung
+export const FRAMES = KHUNG_AO_TU_DUNG;

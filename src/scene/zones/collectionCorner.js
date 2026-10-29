@@ -5,12 +5,13 @@
 import { BR } from '../../config/brand.js';
 import { T, scene, addHotspot, maxAniso } from '../core.js';
 import { stationIndex } from '../../config/stations.js';
-import { COLLECTION_DECKS, BALLS, BALL_DIAMETER, FRAMES, FRAME_HEIGHT } from '../../config/collection.js';
+import { COLLECTION_DECKS, BALLS, BALL_DIAMETER, FRAMES, FRAME_HEIGHT, JERSEY_FRAME_RATIO } from '../../config/collection.js';
 import { assetUrl } from '../../env.js';
 import { std, box, plane, pool } from '../helpers.js';
 import { rr } from '../random.js';
 import { deckTex } from '../textures/deck.js';
 import { canvasTex } from '../textures/canvas.js';
+import { loadGarment } from '../props/garment.js';
 
 const WALL = 5;                 // mặt tường phải (x)
 const FACE = -Math.PI / 2;      // xoay mặt phẳng để quay ra giữa tiệm
@@ -43,13 +44,17 @@ export function buildCollectionCorner() {
 
   // ---- khung áo đấu (nhóm bên phải, phía cửa) ----
   const frameTop = 2.3, gap = 0.25;
-  const framesP = Promise.all(FRAMES.map(f => loadTex(f.image).then(tex => ({ f, tex, w: FRAME_HEIGHT * tex.image.width / tex.image.height }))))
+  // mỗi khung: tải trước (ảnh khung hoặc áo) để biết bề ngang, rồi mới xếp hàng
+  const framesP = Promise.all(FRAMES.map(f => (f.jersey ? prepJerseyFrame(f) : prepPhotoFrame(f))))
     .then(list => {
+      // khung tự dựng: cùng một bề ngang, đủ cho áo rộng nhất (tối thiểu theo JERSEY_FRAME_RATIO)
+      const jw = Math.max(FRAME_HEIGHT * JERSEY_FRAME_RATIO, ...list.filter(x => x.needW).map(x => x.needW));
+      list.forEach(x => { if (x.needW) x.setWidth(jw); });
       const total = list.reduce((s, x) => s + x.w, 0) + gap * (list.length - 1);
       let z = -23.45 - total / 2;                    // căn giữa nhóm khung quanh z = -23.45, trái → phải
-      return list.map(({ f, tex, w }) => {
-        const cz = z + w / 2;
-        const obj = buildFrame(tex, w, FRAME_HEIGHT, cz, frameTop - FRAME_HEIGHT / 2);
+      return list.map(item => {
+        const { f, w } = item, cz = z + w / 2;
+        const obj = item.build(cz, frameTop - FRAME_HEIGHT / 2);
         z += w + gap;
         return { stop, pos: new T.Vector3(WALL - 0.08, frameTop - FRAME_HEIGHT - 0.06, cz), product: asItem(f), object: obj };
       });
@@ -75,7 +80,7 @@ export function buildCollectionCorner() {
 }
 
 // Đồ sưu tầm → dạng "sản phẩm" cho khung chi tiết (không có giá)
-const asItem = x => ({ ...x, zone: 'collection', price: null });
+const asItem = x => ({ ...x, image: x.image || x.jersey, zone: 'collection', price: null });
 
 function loadTex(src) {
   return new Promise((res, rej) => {
@@ -123,17 +128,83 @@ async function buildBall(b, z, baseY, shelfD) {
   return ball;
 }
 
-// Khung áo: hộp sâu màu đen sát tường, mặt trước là ảnh chụp thật của cả khung,
-// một lớp kính có vệt sáng chéo, bóng đổ mờ trên tường và đèn rọi tranh bằng đồng phía trên.
-function buildFrame(tex, w, h, z, y) {
-  const depth = 0.06;
-  box(depth, h, w, std('#0d0c10', 0.5), WALL - depth / 2, y, z);
-  // bóng đổ mờ xuống dưới
+// Kiểu 1 — ảnh chụp cả khung: hộp sâu màu đen sát tường, mặt trước là ảnh thật của khung.
+async function prepPhotoFrame(f) {
+  const tex = await loadTex(f.image);
+  const h = FRAME_HEIGHT, w = h * tex.image.width / tex.image.height;
+  return {
+    f, w,
+    build: (z, y) => {
+      const depth = 0.06;
+      box(depth, h, w, std('#0d0c10', 0.5), WALL - depth / 2, y, z);
+      frameExtras(w, h, z, y, depth);
+      return plane(w, h, new T.MeshStandardMaterial({ map: tex, roughness: 0.75 }), WALL - depth - 0.001, y, z, FACE);
+    }
+  };
+}
+
+// Kiểu 2 — ảnh áo đã xoá nền: tự dựng khung hộp sâu, nền vải tối viền giấy trắng,
+// áo 2.5D ép phẳng sau kính, bảng đồng khắc tên ở dưới.
+async function prepJerseyFrame(f) {
+  // mọi khung tự dựng cùng một cỡ; áo thu nhỏ cho vừa vùng bên trong (áo ngang thì vừa theo chiều ngang)
+  const h = FRAME_HEIGHT, border = 0.045, depth = 0.075;
+  const top = 0.07, bottom = 0.16, side = 0.06;                        // lề tối thiểu quanh áo
+  // mọi áo cùng một chiều dài (cùng cỡ); khung rộng theo áo rộng nhất để mọi khung bằng nhau
+  const maxL = h - 2 * border - top - bottom;
+  const shirt = await loadGarment(assetUrl(f.jersey), 'tee', maxL);
+  const k = 1, jl = maxL, jw = shirt.userData.width;
+  return {
+    f, needW: jw + 2 * (border + side),
+    setWidth(w) { this.w = w; },
+    build(z, y) {
+      const w = this.w;
+      const frameM = std('#0d0c10', 0.45), innerW = w - 2 * border, innerH = h - 2 * border;
+      // 4 thanh khung + đáy hộp
+      box(depth, border, w, frameM, WALL - depth / 2, y + h / 2 - border / 2, z);
+      box(depth, border, w, frameM, WALL - depth / 2, y - h / 2 + border / 2, z);
+      box(depth, innerH, border, frameM, WALL - depth / 2, y, z - w / 2 + border / 2);
+      box(depth, innerH, border, frameM, WALL - depth / 2, y, z + w / 2 - border / 2);
+      // nền vải tối + viền giấy trắng quanh áo + bảng đồng
+      const jy = y + h / 2 - border - top;                              // mép trên của áo
+      const back = canvasTex(512, Math.round(512 * innerH / innerW), (g, cw, ch) => {
+        g.fillStyle = '#18161d'; g.fillRect(0, 0, cw, ch);
+        for (let i = 0; i < 2500; i++) { g.fillStyle = `rgba(255,255,255,${Math.random() * 0.035})`; g.fillRect(Math.random() * cw, Math.random() * ch, 1, 2); }
+        const px = cw / innerW, m = 0.025 * px;
+        const sx = (innerW - jw) / 2, sy = top + (maxL - jl) / 2;        // vị trí áo trong nền
+        g.strokeStyle = '#f2efe8'; g.lineWidth = 0.012 * px;
+        g.strokeRect((sx - 0.025) * px, (sy - 0.025) * px, (jw + 0.05) * px, (jl + 0.05) * px);
+        g.lineWidth = 0.004 * px; g.strokeStyle = 'rgba(242,239,232,.5)';
+        g.strokeRect(m * 0.6, m * 0.6, cw - m * 1.2, ch - m * 1.2);
+      });
+      plane(innerW, innerH, new T.MeshStandardMaterial({ map: back, roughness: 0.95 }), WALL - 0.006, y, z, FACE);
+      const [l1, l2] = f.plaque || [f.name, ''];
+      const plaqueTex = canvasTex(640, 120, (g, cw, ch) => {
+        const gr = g.createLinearGradient(0, 0, 0, ch); gr.addColorStop(0, '#e9cf88'); gr.addColorStop(0.5, '#bf9a50'); gr.addColorStop(1, '#8c6c2e');
+        g.fillStyle = gr; g.fillRect(0, 0, cw, ch);
+        g.strokeStyle = 'rgba(60,40,10,.55)'; g.lineWidth = 4; g.strokeRect(7, 7, cw - 14, ch - 14);
+        g.fillStyle = '#3a2810'; g.textAlign = 'center';
+        g.font = '800 40px Montserrat, sans-serif'; g.fillText(l1, cw / 2, 56);
+        g.font = '500 28px "Be Vietnam Pro", sans-serif'; g.fillText(l2, cw / 2, 96);
+      });
+      plane(Math.min(0.3, innerW * 0.55), 0.056, new T.MeshStandardMaterial({ map: plaqueTex, roughness: 0.3, metalness: 0.65 }),
+        WALL - 0.009, y - h / 2 + border + bottom * 0.5, z, FACE);
+      // áo: ép phẳng (độ phồng còn 35%), áp sát nền, căn giữa vùng phía trên bảng đồng
+      shirt.scale.set(k, k, 0.35 * k);
+      shirt.rotation.y = FACE;
+      shirt.position.set(WALL - 0.008 - shirt.userData.back * 0.35 * k, jy - (maxL - jl) / 2, z);
+      scene.add(shirt);
+      frameExtras(w, h, z, y, depth);
+      // tấm vô hình phủ mặt khung để bấm vào cả khung
+      const pick = plane(w, h, new T.MeshBasicMaterial(), WALL - depth, y, z, FACE); pick.visible = false;
+      return pick;
+    }
+  };
+}
+
+// Phần chung của hai kiểu khung: kính có vệt sáng chéo, bóng đổ mờ trên tường, đèn rọi tranh bằng đồng
+function frameExtras(w, h, z, y, depth) {
   const sh = canvasTex(128, 160, (g, cw, ch) => { g.filter = 'blur(10px)'; g.fillStyle = 'rgba(0,0,0,.55)'; g.fillRect(18, 22, cw - 36, ch - 36); }, { linear: true });
   plane(w * 1.25, h * 1.22, new T.MeshBasicMaterial({ map: sh, transparent: true, depthWrite: false }), WALL - 0.004, y - 0.05, z, FACE);
-  // ảnh khung
-  const photo = plane(w, h, new T.MeshStandardMaterial({ map: tex, roughness: 0.75 }), WALL - depth - 0.001, y, z, FACE);
-  // kính: vệt sáng chéo mờ
   const streak = canvasTex(256, 320, (g, cw, ch) => {
     const gr = g.createLinearGradient(0, 0, cw, ch);
     gr.addColorStop(0.25, 'rgba(255,255,255,0)'); gr.addColorStop(0.38, 'rgba(255,255,255,.55)');
@@ -141,11 +212,9 @@ function buildFrame(tex, w, h, z, y) {
     g.fillStyle = gr; g.fillRect(0, 0, cw, ch);
   }, { linear: true });
   plane(w * 0.86, h * 0.9, new T.MeshBasicMaterial({ map: streak, transparent: true, opacity: 0.16, blending: T.AdditiveBlending, depthWrite: false }), WALL - depth - 0.004, y, z, FACE);
-  // đèn rọi tranh
   const brass = std('#b6a46a', 0.3, 1), top = y + h / 2;
   box(0.12, 0.012, 0.012, brass, WALL - 0.06, top + 0.1, z);
   const lamp = new T.Mesh(new T.CylinderGeometry(0.018, 0.022, w * 0.5, 16), brass);
   lamp.rotation.x = Math.PI / 2; lamp.position.set(WALL - 0.12, top + 0.1, z); scene.add(lamp);
   pool(WALL - 0.003, y + h * 0.12, z, FACE, w * 1.5, h * 1.25, 0.2, 'rgba(255,236,200,1)');
-  return photo;
 }

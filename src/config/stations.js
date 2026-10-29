@@ -42,7 +42,7 @@ export const STATIONS = [
     label: 'Góc sưu tầm',
     side: 'left',
     camera: { pos: [1.3, 1.5, -24.8], look: [5, 1.6, -24.8] },
-    title: 'Bóng thi đấu, áo có chữ ký và ván của xóm',
+    title: 'Bóng thi đấu, áo đấu đóng khung và ván của xóm',
     body: 'Đồ trưng bày, không bán. Bấm vào từng quả bóng hay khung áo để xem câu chuyện.'
   },
   {
