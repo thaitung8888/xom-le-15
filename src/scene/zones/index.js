@@ -5,7 +5,7 @@ import { buildAlley } from './alley.js';
 import { buildStorefront } from './storefront.js';
 import { buildShell } from './shell.js';
 import { buildHoodieRail } from './hoodieRail.js';
-import { buildSkateCorner } from './skateCorner.js';
+import { buildCollectionCorner } from './collectionCorner.js';
 import { buildGraffitiWall } from './graffitiWall.js';
 import { buildIsland } from './island.js';      // cần TX.muralCanvas từ bức graffiti, nên dựng sau
 import { buildShoeWall } from './shoeWall.js';
@@ -19,7 +19,7 @@ export const BUILD_STEPS = [
   buildStorefront,
   buildShell,
   buildHoodieRail,
-  buildSkateCorner,
+  buildCollectionCorner,
   buildGraffitiWall,
   buildIsland,
   buildShoeWall,

@@ -5,7 +5,7 @@ import { $, assetUrl as url } from '../env.js';
 import { formatPrice } from '../config/products.js';
 import { SETTINGS } from '../config/settings.js';
 
-const ZONE_TITLES = { hoodie: 'Kệ áo', skate: 'Góc skate', shoes: 'Tường giày' };
+const ZONE_TITLES = { hoodie: 'Kệ áo', collection: 'Góc sưu tầm', shoes: 'Tường giày' };
 const SPEC_ROWS = [['material', 'Chất liệu'], ['color', 'Màu'], ['fit', 'Form']];
 const GHOSTS = 3;   // số món kế tiếp hiện mờ phía sau
 const touch = matchMedia('(hover: none)').matches;
@@ -72,18 +72,23 @@ function render(animate) {
   // Thông tin
   el('dKind').textContent = [p.brand, p.kind].filter(Boolean).join(' · ');
   el('dName').textContent = p.name;
-  el('dPrice').textContent = formatPrice(p.price);
+  // đồ sưu tầm không bán: ẩn giá và nút liên hệ, hiện các dòng thông tin (giải đấu, cầu thủ…)
+  const forSale = p.price != null;
+  root.dataset.zone = p.zone || '';
+  el('dPrice').hidden = !forSale;
+  if (forSale) el('dPrice').textContent = formatPrice(p.price);
   const specs = el('dSpecs'); specs.replaceChildren();
+  (p.facts || []).forEach(([label, value]) => { row(specs, label).textContent = value; });
   if (p.sizes?.length) {
     const dd = row(specs, 'Size');
     p.sizes.forEach(s => { const c = document.createElement('span'); c.className = 'd-chip'; c.textContent = s; dd.append(c); });
   }
   SPEC_ROWS.forEach(([k, label]) => { if (p[k]) row(specs, label).textContent = p[k]; });
   if (!specs.children.length && p.meta) row(specs, 'Ghi chú').textContent = p.meta;
-  el('dDesc').textContent = p.description || 'Chưa có mô tả cho món này.';
+  el('dDesc').textContent = p.description || (forSale ? 'Chưa có mô tả cho món này.' : 'Chưa có câu chuyện cho món này.');
   el('dDesc').classList.toggle('empty', !p.description);
   const cta = el('dCta');
-  cta.hidden = !SETTINGS.contactUrl;
+  cta.hidden = !SETTINGS.contactUrl || !forSale;
   if (SETTINGS.contactUrl) cta.href = SETTINGS.contactUrl;
 
   // Ảnh các mặt

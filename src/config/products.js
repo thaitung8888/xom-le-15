@@ -2,11 +2,11 @@
 // Từ khi có Supabase, sản phẩm thật được thêm/sửa ở trang /admin và lưu trong cơ sở dữ liệu.
 // Danh sách dưới đây chỉ dùng khi: khu đó chưa chuyển sang cơ sở dữ liệu (ván, giày),
 // hoặc không kết nối được Supabase, hoặc để "nhập món mẫu" lần đầu trong trang admin.
+// Ván trượt, bóng và khung áo ở Góc sưu tầm là đồ trưng bày: xem src/config/collection.js.
 // Mỗi sản phẩm được gắn vào một "chỗ trưng bày" (zone + slot) trong cảnh 3D.
 // Sản phẩm có trong danh sách này sẽ tự có chấm giá bấm được.
 //
-//   zone : 'skate' (8 mặt ván trên tường phải, slot 0–7)
-//          'shoes' (giá đỡ trên tường giày, đánh số từ 0: hàng dưới lên trên, mỗi hàng trái sang phải; hiện đang để trống)
+//   zone : 'shoes' (giá đỡ trên tường giày, đánh số từ 0: hàng dưới lên trên, mỗi hàng trái sang phải; hiện đang để trống)
 //          'hoodie' (thanh treo tường trái, tối đa 25 món, tự xếp đè lên nhau và căn giữa)
 //   type : (khu hoodie) 'tee' áo thun/polo/áo đấu · 'hoodie' · 'dress' váy — quyết định chiều dài
 //          (xem garmentLengths trong settings.js) và độ phồng
@@ -167,22 +167,6 @@ export const PRODUCTS = [
     color: 'Đen',
     fit: 'Dáng xoè, dài chấm gót',
     description: 'Váy hai dây dáng dài, thân trên ôm, chân váy xếp ly xoè nhẹ khi bước.'
-  },
-  {
-    id: 'van-so-15',
-    zone: 'skate', slot: 1,
-    kind: 'Mặt ván · gỗ phong 7 lớp',
-    name: 'Ván "Số 15"',
-    price: 1150000,
-    meta: 'Rộng 8.0 inch · chưa gồm trục bánh'
-  },
-  {
-    id: 'van-chu-xom',
-    zone: 'skate', slot: 5,
-    kind: 'Mặt ván · gỗ phong 7 lớp',
-    name: 'Ván "Chữ XÓM"',
-    price: 1250000,
-    meta: 'Rộng 8.25 inch · in lụa thủ công'
   }
 ];
 

@@ -39,11 +39,11 @@ export const STATIONS = [
   },
   {
     id: 'skate',
-    label: 'Góc skate',
+    label: 'Góc sưu tầm',
     side: 'left',
     camera: { pos: [1.3, 1.5, -24.8], look: [5, 1.6, -24.8] },
-    title: '8 mặt ván, in màu của xóm',
-    body: 'Gỗ phong 7 lớp, rộng 8.0 đến 8.25 inch. Bấm chấm sáng để xem giá.'
+    title: 'Bóng thi đấu, áo có chữ ký và ván của xóm',
+    body: 'Đồ trưng bày, không bán. Bấm vào từng quả bóng hay khung áo để xem câu chuyện.'
   },
   {
     id: 'hang-moi',

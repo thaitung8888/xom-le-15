@@ -26,6 +26,7 @@ xom-le-15/
 ├─ supabase/schema.sql         Tạo bảng, kho ảnh, phân quyền trên Supabase (chạy một lần)
 ├─ scripts/prepare_image.py    (tuỳ chọn) xử lý ảnh bằng Python; trang admin đã tự làm việc này
 ├─ public/products/            Ảnh 11 món mẫu (dùng khi nhập món mẫu và khi mất kết nối Supabase)
+├─ public/collection/          Ảnh bóng lưu niệm và khung áo đấu của Góc sưu tầm
 └─ src/
    ├─ main.js                  Điểm vào: dựng giao diện rồi chọn chế độ vẽ nền
    ├─ env.js                   Thông tin môi trường (màn nhỏ, giảm chuyển động)
@@ -33,6 +34,7 @@ xom-le-15/
    ├─ config/                  ★ NỘI DUNG — phần hay sửa nhất
    │  ├─ stations.js           10 trạm: chữ hiển thị + vị trí camera
    │  ├─ products.js           Sản phẩm MẪU / dự phòng (sản phẩm thật nằm trên Supabase)
+   │  ├─ collection.js         Góc sưu tầm: 5 ván, bóng lưu niệm, khung áo có chữ ký (viết tay, không bán)
    │  ├─ supabase.js           Địa chỉ project Supabase + publishable key
    │  ├─ brand.js              Màu thương hiệu, phông chữ cần tải
    │  └─ settings.js           Cài đặt chung (chuỗi ảnh Blender, giày mẫu, hạt ngẫu nhiên)
@@ -71,7 +73,7 @@ xom-le-15/
    │     ├─ storefront.js      Mặt tiền kính, cửa trượt, biển neon
    │     ├─ shell.js           Vỏ tiệm: sàn, tường, trần, đèn chính
    │     ├─ hoodieRail.js      Kệ áo: tối đa 25 món 2.5D xếp đè lên nhau
-   │     ├─ skateCorner.js     Góc skate
+   │     ├─ collectionCorner.js Góc sưu tầm: ván treo dọc, kệ bóng trong hộp mica, khung áo đấu
    │     ├─ graffitiWall.js    Bức graffiti
    │     ├─ island.js          Đảo hàng mới
    │     ├─ shoeWall.js        Tường giày
@@ -92,7 +94,10 @@ Quy ước chia lớp: **config** chỉ chứa dữ liệu, **ui** chỉ lo HTML
 
 **Thêm hoặc sửa sản phẩm trên kệ áo** — dùng trang quản trị `/admin` (xem mục bên dưới), không cần sửa code.
 
-**Sản phẩm ở góc skate / tường giày** (chưa chuyển sang cơ sở dữ liệu) — thêm một mục vào `src/config/products.js`:
+**Góc sưu tầm** (đồ trưng bày, không bán) — sửa `src/config/collection.js`: đổi mẫu ván, thêm/bớt bóng, khung áo, chữ trên bảng đồng và câu chuyện hiện khi bấm vào.
+Ảnh bóng: vuông, nền trong suốt, quả bóng tròn sát mép. Ảnh khung áo: chụp chính diện, cắt sát mép ngoài khung. Đặt vào `public/collection/`.
+
+**Sản phẩm ở tường giày** (đang để trống, chưa chuyển sang cơ sở dữ liệu) — thêm một mục vào `src/config/products.js`:
 
 ```js
 {
@@ -106,7 +111,7 @@ Quy ước chia lớp: **config** chỉ chứa dữ liệu, **ui** chỉ lo HTML
 }
 ```
 
-Sản phẩm có trong danh sách sẽ tự hiện chấm giá. Các khu đang nhận sản phẩm: `skate` (slot 0–7) và `shoes` (giá đỡ trên tường giày, đánh số từ 0 theo hàng từ dưới lên, mỗi hàng từ trái sang phải). Khi đủ giày thật, đặt `fillDemoShoes: false` trong `settings.js` để bỏ giày mẫu.
+Sản phẩm có trong danh sách sẽ tự hiện chấm giá. Khu `shoes` (giá đỡ trên tường giày, đánh số từ 0 theo hàng từ dưới lên, mỗi hàng từ trái sang phải). Khi đủ giày thật, đặt `fillDemoShoes: false` trong `settings.js` để bỏ giày mẫu.
 
 **Thêm một khu mới** — tạo file trong `src/scene/zones/`, export một hàm `buildTenKhu()`, rồi thêm hàm đó vào `BUILD_STEPS` trong `zones/index.js`. Hiệu ứng chạy mỗi khung hình thì đăng ký bằng `onFrame(fn)` từ `scene/core.js`.
 
@@ -125,7 +130,7 @@ Sản phẩm trên kệ áo được lưu trên **Supabase** (cơ sở dữ li�
 Ảnh tải lên được tự xử lý trong trình duyệt: xoá nền trơn (ảnh JPG nền trắng, xám), cắt sát viền, thu nhỏ còn 1024px, lưu WebP.
 Ảnh đẹp nhất: chụp chính diện, cao từ 1000px, nền đã xoá hoặc nền trơn khác màu áo.
 
-**Cửa tiệm đọc dữ liệu thế nào** (`src/data/catalog.js`): kệ áo luôn lấy từ Supabase (kể cả khi trống); góc skate và tường giày vẫn dùng `src/config/products.js`.
+**Cửa tiệm đọc dữ liệu thế nào** (`src/data/catalog.js`): kệ áo luôn lấy từ Supabase (kể cả khi trống); tường giày vẫn dùng `src/config/products.js`; Góc sưu tầm viết tay trong `src/config/collection.js`.
 Nếu không kết nối được Supabase, cửa tiệm dùng tạm danh sách mẫu để không bao giờ trống.
 
 **Bảo mật**: publishable key nằm công khai trong trang là bình thường. Quyền do phân quyền (RLS) trong `schema.sql` quyết định:
@@ -152,6 +157,6 @@ Chữ, thanh trạm và hiệu ứng dừng ở mỗi trạm giữ nguyên.
 
 ## Hướng phát triển tiếp
 
-- Chuyển góc skate và tường giày sang cơ sở dữ liệu + trang quản trị.
+- Chuyển tường giày sang cơ sở dữ liệu + trang quản trị.
 - Thêm chỗ trưng bày cho đảo hàng mới (`zone: 'island'`).
 - Tối ưu cho điện thoại: gộp vật thể tĩnh, giảm đèn, tự hạ chất lượng khi máy yếu.

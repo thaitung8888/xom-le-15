@@ -25,7 +25,7 @@ export function createHotspots(list, camera) {
   const els = list.map(hs => {
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'hs'; b.tabIndex = -1;
-    b.setAttribute('aria-label', `${hs.product.name}, ${formatPrice(hs.product.price)}. Xem chi tiết`);
+    b.setAttribute('aria-label', `${hs.product.name}${hs.product.price != null ? ', ' + formatPrice(hs.product.price) : ''}. Xem chi tiết`);
     b.addEventListener('click', e => { e.stopPropagation(); open(hs); });
     b.addEventListener('pointerenter', () => setHover(hs));
     b.addEventListener('pointerleave', () => setHover(null));
