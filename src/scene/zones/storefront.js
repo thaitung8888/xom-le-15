@@ -42,8 +42,8 @@ export function buildStorefront() {
     g.clearRect(0, 0, w, h); g.fillStyle = '#fff'; g.textAlign = 'center';
     lines.forEach(([t, f, y]) => { g.font = f; g.fillText(t, w / 2, y); });
   }) });
-  plane(1.0, 0.25, smallText([['STREETWEAR', '800 44px Montserrat, sans-serif', 54], ['HÀ NỘI · TỪ 2026', '600 28px Montserrat, sans-serif', 102]]), -(0.72 + sideW / 2), 1.2, Z + 0.012);
-  plane(1.0, 0.25, smallText([['MỞ CỬA 9:00 – 22:00', '800 40px Montserrat, sans-serif', 54], ['MỖI NGÀY', '600 28px Montserrat, sans-serif', 102]]), (0.72 + sideW / 2), 1.2, Z + 0.012);
+  plane(1.0, 0.25, smallText([['Phù Đổng', '800 44px Montserrat, sans-serif', 54], ['HÀ NỘI · TỪ 2026', '600 28px Montserrat, sans-serif', 102]]), -(0.72 + sideW / 2), 1.2, Z + 0.012);
+  plane(1.0, 0.25, smallText([['MỞ CỬA 9:00 – 17:00', '800 40px Montserrat, sans-serif', 54], ['MỖI NGÀY', '600 28px Montserrat, sans-serif', 102]]), (0.72 + sideW / 2), 1.2, Z + 0.012);
   // hai cánh cửa trượt, logo tròn chia đôi trên hai cánh
   const rt = roundelTex();
   const half = off => { const t = rt.clone(); t.needsUpdate = true; t.repeat.set(0.5, 1); t.offset.set(off, 0); return new T.MeshBasicMaterial({ map: t, transparent: true, opacity: 0.8, depthWrite: false }); };

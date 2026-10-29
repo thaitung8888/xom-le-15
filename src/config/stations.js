@@ -13,9 +13,9 @@ export const STATIONS = [
     label: 'Đầu ngõ',
     camera: { pos: [0, 1.6, 7], look: [0, 2.8, -20] },
     hero: {
-      eyebrow: ['Streetwear', '·', 'Hà Nội · từ 2026'],
-      titleHtml: 'Một tiệm quần áo ở số <em>15</em>, cuối xóm.',
-      lede: 'Đèn đường vàng, nền gạch ướt, một biển neon tím trên cửa. Đi chậm, nhìn quanh.',
+      eyebrow: ['Phù Đổng', '·', 'Hà Nội · từ 2026'],
+      titleHtml: 'Tiệm quần áo ở số <em>15</em>, cuối xóm.',
+      lede: '',
       hint: 'Cuộn để vào xóm'
     }
   },
@@ -25,24 +25,24 @@ export const STATIONS = [
     side: 'right',
     camera: { pos: [0.2, 1.65, -13.2], look: [0, 2.1, -30] },
     title: 'Tường vàng, cửa chớp xanh, dây điện, gió nhẹ',
-    body: 'Ngõ rộng hai mét, cuối ngõ là mặt kính sáng đèn. Cửa tự trượt mở khi bạn bước tới.'
+    body: ''
   },
   {
     id: 'hoodie',
-    label: 'Kệ hoodie',
+    label: 'Kệ quần áo',
     side: 'right',
     camera: { pos: [0.1, 1.75, -27.3], look: [-5, 2.1, -27.8] },
     // điện thoại: lùi về gần tường đối diện để thấy đủ cả dãy áo
     cameraPortrait: { pos: [3.3, 1.7, -27.7], look: [-5, 1.75, -27.8] },
-    title: 'Giá treo dọc tường trái, đang chờ hàng',
-    body: 'Lô hoodie đầu tiên sắp lên kệ: nỉ bông 420gsm, form rộng.'
+    title: 'Sản phẩm hiện có ở cửa hàng',
+    body: ''
   },
   {
     id: 'skate',
     label: 'Góc sưu tầm',
     side: 'left',
     camera: { pos: [1.3, 1.5, -24.8], look: [5, 1.6, -24.8] },
-    title: 'Bóng thi đấu, áo đấu đóng khung và ván của xóm',
+    title: 'Bóng thi đấu, áo đấu đóng khung của xóm',
     body: 'Đồ trưng bày, không bán. Bấm vào từng quả bóng hay khung áo để xem câu chuyện.'
   },
   {
@@ -51,7 +51,7 @@ export const STATIONS = [
     side: 'right',
     camera: { pos: [1.15, 1.85, -28.45], look: [-0.6, 1.45, -31.55] },
     title: 'Món tiệm chọn tuần này',
-    body: 'Một món duy nhất trên đảo giữa tiệm, xoay chậm dưới đèn. Bấm vào để xem chi tiết.'
+    body: ''
   },
   {
     id: 'buc-tuong',
@@ -75,15 +75,15 @@ export const STATIONS = [
     side: 'right',
     camera: { pos: [-0.3, 1.85, -36.4], look: [-4.4, 1.2, -41.0] },
     title: 'Phòng thử trong góc, sofa ngồi chờ',
-    body: 'Hai phòng rèm nhung tím nép trong góc. Bên ngoài có sofa, đèn cây và gương toàn thân.'
+    body: ''
   },
   {
     id: 'quay',
     label: 'Quầy',
     side: 'left',
     camera: { pos: [0.4, 1.75, -36.4], look: [3.8, 1.5, -40.6] },
-    title: 'Quầy gọn, trả nhanh',
-    body: 'Thẻ, QR, tiền mặt. Mặt quầy ngà liền khối, ốp lam tím, đèn vàng hắt dưới chân.'
+    title: 'Quầy',
+    body: 'Thẻ, QR, tiền mặt.'
   },
   {
     id: 'hen-o-xom',
@@ -94,12 +94,12 @@ export const STATIONS = [
     eyebrow: 'Hẹn ở xóm',
     title: '15 Xóm Lẻ, Hà Nội',
     hours: [
-      ['Mở cửa', '9:00 – 22:00, mỗi ngày'],
-      ['Hàng mới', 'Sáng thứ Sáu'],
-      ['Size', 'Áo S–XL · Giày 39–44']
+      ['Mở cửa', '9:00 – 17:00, mỗi ngày'],
+      ['Hàng mới', 'Hằng tháng'],
+      ['Size', 'Áo S–XL']
     ],
     cta: 'Đi lại từ đầu ngõ',
-    fine: 'Bản demo · nội dung và giá là ví dụ · dựng bằng Three.js'
+    fine: 'Bản demo · nội dung và giá là ví dụ · dựng bởi Thái Thanh Tùng'
   }
 ];
 
